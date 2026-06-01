@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Was ist KI? · ADA erklärt es dir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ADA erklaert KI — Vollbild-Praesentation mit Sprachausgabe & Kapiteln
+   Inhalte: weiter unten in der Liste SLIDES. Kapitel: in CHAPTERS.
+   Steuerung: Leertaste / Pfeil rechts = weiter · Pfeil links = zurueck
+              F = Vollbild · Lautsprecher = ADA liest vor · ⊞ = Kapiteluebersicht
+   PLATZBUDGET: jede Folie ist so gestaltet, dass sie ohne Scrollen passt.
+   ============================================================ */
+:root{
+  --bg:#0b0e13; --bg2:#0f131b;
+  --panel:rgba(255,255,255,.04);
+  --ink:#f3ede1; --muted:#9aa6b6; --faint:#5d6877;
+  --amber:#ffb24d; --amber-deep:#f0942a;
+  --mint:#5eead4; --mint-deep:#2fb9a3;
+  --red:#ff8b8b;
+  --line:rgba(255,255,255,.10); --line-soft:rgba(255,255,255,.06);
+  --shadow:0 30px 80px -30px rgba(0,0,0,.85);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:radial-gradient(1400px 900px at 72% -12%, #16212d 0%, var(--bg) 55%) fixed, var(--bg);
+  color:var(--ink); font-family:'Hanken Grotesk',sans-serif; overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+#net{position:fixed;inset:0;z-index:0;opacity:.5}
+body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+#stage{position:relative;z-index:2;height:100vh;height:100dvh;display:flex;flex-direction:column}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;gap:16px;padding:clamp(10px,1.8vh,20px) clamp(18px,3.2vw,52px) 0}
+.brand{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,13px);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 14px var(--amber);animation:lp 2s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.35}}
+.chapterbar{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.chapterlabel{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,1vw,12px);letter-spacing:.12em;text-transform:uppercase;color:var(--mint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chapterlabel .num{color:var(--faint)}
+.progress{display:flex;gap:3px;align-items:center}
+.seg{display:flex;gap:2px;flex:1}
+.seg::after{content:"";width:10px;flex:none}
+.seg:last-child::after{display:none}
+.tick{height:3px;flex:1;border-radius:3px;background:var(--line);overflow:hidden;min-width:4px}
+.tick i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--amber-deep));transition:width .4s}
+.tick.done i{width:100%}
+.tick.cur i{width:100%;background:linear-gradient(90deg,var(--mint),var(--mint-deep))}
+.counter{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,13px);color:var(--faint);min-width:58px;text-align:right}
+
+/* ---------- main ---------- */
+.main{flex:1;display:flex;align-items:stretch;justify-content:center;padding:clamp(12px,2.2vh,30px) clamp(18px,3.2vw,52px);min-height:0;overflow:hidden}
+.slide{width:100%;max-width:1760px;display:none}
+.slide.active{display:flex;flex-direction:column;justify-content:center;animation:in .5s cubic-bezier(.16,1,.3,1)}
+@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* COVER */
+.slide.active.cover{align-items:center;justify-content:center;text-align:center;gap:clamp(14px,2.4vh,28px)}
+.cover .kicker{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.3vw,15px);letter-spacing:.34em;text-transform:uppercase;color:var(--mint)}
+.cover h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(36px,6.2vw,92px);line-height:1.0;letter-spacing:-.02em;max-width:18ch}
+.cover h1 em{font-style:italic;color:var(--amber)}
+.cover .sub{font-size:clamp(15px,1.8vw,23px);color:var(--muted);max-width:54ch;line-height:1.5}
+.cover .speech{max-width:760px}
+.cover .agentstatus,.slide:not(.content) .agentstatus{display:none}
+
+/* SECTION DIVIDER slide */
+.slide.active.section{align-items:center;justify-content:center;text-align:center;gap:clamp(12px,2vh,22px)}
+.section .secnum{font-family:'JetBrains Mono',monospace;font-size:clamp(13px,1.5vw,18px);letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
+.section h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(34px,5.4vw,76px);line-height:1.04;letter-spacing:-.02em;max-width:20ch}
+.section h1 em{font-style:italic;color:var(--amber)}
+.section .secsub{font-size:clamp(15px,1.7vw,22px);color:var(--muted);max-width:52ch;line-height:1.5}
+.section .secmap{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:780px;margin-top:8px}
+.section .secmap span{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.05vw,13px);padding:7px 13px;border-radius:999px;border:1px solid var(--line);color:var(--faint)}
+.section .secmap span.on{border-color:var(--amber);color:var(--amber);background:rgba(255,178,77,.1)}
+
+/* CONTENT — two columns, full height */
+.slide.active.content{display:grid;grid-template-columns:minmax(290px,32%) 1fr;gap:clamp(24px,3.4vw,56px);align-items:stretch}
+.botcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,2vh,22px);min-width:0;overflow:hidden}
+.maincol{display:flex;flex-direction:column;justify-content:center;gap:clamp(9px,1.5vh,18px);min-width:0;min-height:0}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,13px);letter-spacing:.2em;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.eyebrow::before{content:"";width:28px;height:1px;background:var(--mint);opacity:.7}
+.maincol h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(26px,3.7vw,52px);line-height:1.05;letter-spacing:-.015em}
+.maincol h2 em{font-style:italic;color:var(--amber)}
+
+.dimsteps{display:flex;gap:6px;flex-wrap:wrap}
+.dimstep{font-family:'JetBrains Mono',monospace;font-size:clamp(8.5px,.9vw,11px);letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--faint)}
+.dimstep.on{border-color:var(--amber);color:var(--amber);background:rgba(255,178,77,.1)}
+
+/* ---------- ADA bot (SVG face) ---------- */
+.bot{position:relative;width:clamp(120px,15vw,230px);aspect-ratio:1;display:grid;place-items:center;flex:none}
+.halo{position:absolute;inset:-22%;border-radius:50%;background:radial-gradient(circle,rgba(255,178,77,.42) 0%,rgba(255,178,77,.10) 42%,transparent 68%);filter:blur(6px);animation:halo 4.5s ease-in-out infinite}
+@keyframes halo{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.1);opacity:1}}
+.adasvg{position:relative;width:84%;height:auto;overflow:visible;animation:bob 5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.adasvg .body{fill:url(#adaBody);stroke:rgba(255,255,255,.16);stroke-width:1.5}
+.adasvg .cheek{fill:var(--amber);opacity:.16}
+.adasvg .ant{stroke:rgba(255,255,255,.32);stroke-width:2.4;stroke-linecap:round}
+.adasvg .anttip{fill:var(--amber);transform-box:fill-box;transform-origin:center;animation:tip 2.4s ease-in-out infinite}
+@keyframes tip{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.3);opacity:1}}
+.adasvg .eye{fill:var(--mint);transform-box:fill-box;transform-origin:center;animation:blink 5.4s infinite}
+.adasvg .eye.r{animation-delay:.05s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%,98%{transform:scaleY(.12)}}
+.adasvg .bar{fill:var(--amber);transform-box:fill-box;transform-origin:center;animation:idle 2.8s ease-in-out infinite}
+.adasvg .bar.b2{animation-delay:.18s}.adasvg .bar.b3{animation-delay:.36s}.adasvg .bar.b4{animation-delay:.54s}.adasvg .bar.b5{animation-delay:.72s}
+@keyframes idle{0%,100%{transform:scaleY(.42)}50%{transform:scaleY(.66)}}
+.bot.talking .adasvg .bar{animation:talk .5s ease-in-out infinite}
+.bot.talking .adasvg .bar.b2{animation-delay:.06s}.bot.talking .adasvg .bar.b3{animation-delay:.12s}.bot.talking .adasvg .bar.b4{animation-delay:.18s}.bot.talking .adasvg .bar.b5{animation-delay:.24s}
+@keyframes talk{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1.15)}}
+.bot.talking .adasvg .eye{fill:#7df5e2}
+.botname{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,.95vw,12px);letter-spacing:.26em;text-transform:uppercase;color:var(--faint)}
+
+/* agent status */
+.agentstatus{display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;max-width:280px}
+.statusrow{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:clamp(9px,1vw,12px);color:var(--mint);letter-spacing:.04em;text-align:center}
+.statusrow .spin{width:12px;height:12px;border-radius:50%;border:2px solid rgba(94,234,212,.25);border-top-color:var(--mint);animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.statusrow.idle{color:var(--faint)} .statusrow.idle .spin{border:2px solid var(--faint);opacity:.4;animation:none}
+.toolchips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.toolchip{font-family:'JetBrains Mono',monospace;font-size:clamp(8px,.82vw,10px);letter-spacing:.05em;text-transform:uppercase;padding:4px 8px;border-radius:7px;border:1px solid var(--line);color:var(--faint);background:rgba(255,255,255,.02);transition:.25s}
+.toolchip.active{color:var(--amber);border-color:var(--amber);background:rgba(255,178,77,.12);box-shadow:0 0 12px rgba(255,178,77,.2)}
+.toolchip.done{color:var(--mint);border-color:rgba(94,234,212,.4)}
+
+/* speech bubble */
+.speech{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:clamp(13px,1.7vw,22px);backdrop-filter:blur(6px);font-size:clamp(14px,1.4vw,20px);line-height:1.55;width:100%;box-shadow:var(--shadow);max-height:42vh;overflow-y:auto}
+.botcol .speech::after{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(45deg);width:16px;height:16px;background:var(--bg2);border-left:1px solid var(--line);border-top:1px solid var(--line)}
+.speech .label{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,1vw,12px);letter-spacing:.2em;color:var(--amber);text-transform:uppercase;display:flex;align-items:center;gap:8px;position:sticky;top:calc(-1*clamp(13px,1.7vw,22px));z-index:2;background:var(--bg2);margin:calc(-1*clamp(13px,1.7vw,22px)) calc(-1*clamp(13px,1.7vw,22px)) 6px;padding:clamp(13px,1.7vw,22px) clamp(13px,1.7vw,22px) 9px;border-radius:20px 20px 0 0}
+.speech .label .spk{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.bot.talking ~ .speech .label .spk,.speech.spk-on .label .spk{background:var(--mint);box-shadow:0 0 10px var(--mint);animation:lp 1s infinite}
+.speech .txt b{color:var(--amber);font-weight:700}
+.speech .txt .hl{color:var(--mint);font-weight:700}
+.cursor{display:inline-block;width:9px;height:1.05em;background:var(--mint);margin-left:2px;vertical-align:-2px;animation:cur .8s steps(1) infinite}
+@keyframes cur{0%,50%{opacity:1}51%,100%{opacity:0}}
+.cursor.hidden{display:none}
+
+/* source */
+.source{display:inline-flex;align-items:flex-start;gap:9px;font-family:'JetBrains Mono',monospace;font-size:clamp(9.5px,.98vw,12px);line-height:1.5;color:var(--faint);border-left:2px solid var(--mint-deep);padding:3px 0 3px 12px;max-width:82ch}
+.source b{color:var(--muted);font-weight:500}
+
+/* viz box — fills available height, never overflows */
+.viz{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,1.8vh,22px);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line-soft);border-radius:22px;padding:clamp(16px,2.2vw,34px);overflow:hidden}
+
+.row{display:flex;gap:clamp(12px,1.5vw,22px);align-items:stretch;flex-wrap:wrap}
+.card{flex:1;min-width:180px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:clamp(14px,1.7vw,26px);display:flex;flex-direction:column;justify-content:center}
+.card h4{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.05vw,13px);letter-spacing:.13em;text-transform:uppercase;margin-bottom:10px}
+.card.a h4{color:var(--amber)} .card.b h4{color:var(--mint)} .card.r h4{color:var(--red)}
+.card p{font-size:clamp(13px,1.4vw,19px);line-height:1.5;color:var(--muted)}
+.card p b{color:var(--ink);font-weight:600}
+.vs{display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-style:italic;color:var(--faint);font-size:clamp(18px,2.2vw,32px);padding:0 4px;flex:0 0 auto}
+
+.flow{display:flex;align-items:center;gap:clamp(8px,1vw,16px);flex-wrap:wrap;justify-content:center}
+.node{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:clamp(12px,1.4vw,22px) clamp(14px,1.6vw,26px);font-size:clamp(14px,1.45vw,20px);text-align:center;line-height:1.35}
+.node .t{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,.95vw,12px);letter-spacing:.1em;text-transform:uppercase;color:var(--mint);display:block;margin-bottom:6px}
+.arrow{color:var(--amber);font-size:clamp(18px,2.2vw,30px);font-weight:700}
+
+.tags{display:flex;flex-wrap:wrap;gap:clamp(9px,1.1vw,14px);justify-content:center}
+.tag{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.3vw,17px);padding:10px 17px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.03)}
+.tag b{color:var(--ink);font-weight:700}
+
+.learnlist{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:clamp(12px,1.5vw,22px)}
+.learn{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:clamp(14px,1.7vw,26px);display:flex;flex-direction:column;justify-content:center}
+.learn .h{display:flex;align-items:center;gap:11px;font-weight:800;font-size:clamp(16px,1.7vw,24px);margin-bottom:7px}
+.learn .ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:21px;background:rgba(255,178,77,.14);border:1px solid rgba(255,178,77,.3);flex:none}
+.learn p{font-size:clamp(13px,1.35vw,18px);color:var(--muted);line-height:1.45}
+.learn p b{color:var(--ink);font-weight:600}
+
+.predict{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;font-size:clamp(18px,2.4vw,34px);font-family:'Fraunces',serif}
+.blank{display:inline-grid;place-items:center;min-width:110px;padding:6px 18px;border-radius:14px;border:1px dashed var(--mint);color:var(--mint)}
+.becomes{color:var(--amber)}
+.answer{padding:6px 22px;border-radius:14px;background:rgba(94,234,212,.12);border:1px solid var(--mint);color:var(--mint)}
+
+.svgwrap{display:flex;justify-content:center;align-items:center;flex:1;min-height:0}
+.svgwrap svg{width:100%;max-width:820px;height:auto;max-height:100%}
+
+.exbox{background:rgba(94,234,212,.07);border:1px solid rgba(94,234,212,.3);border-radius:16px;padding:clamp(13px,1.6vw,24px);font-size:clamp(14px,1.45vw,20px);line-height:1.5;color:var(--ink)}
+.exbox b{color:var(--mint);font-weight:700}
+.exbox .lead{font-family:'JetBrains Mono',monospace;font-size:clamp(9.5px,1vw,12px);letter-spacing:.16em;text-transform:uppercase;color:var(--mint);display:block;margin-bottom:7px}
+.exbox.amber{background:rgba(255,178,77,.07);border-color:rgba(255,178,77,.3)}
+.exbox.amber b,.exbox.amber .lead{color:var(--amber)}
+
+/* definition formula-ish */
+.defrow{display:flex;align-items:center;gap:clamp(10px,1.4vw,20px);flex-wrap:wrap;justify-content:center}
+
+/* map */
+.map{display:flex;flex-direction:column;gap:clamp(10px,1.6vh,20px);align-items:center;width:100%}
+.maprow{display:flex;gap:clamp(12px,1.5vw,22px);flex-wrap:wrap;justify-content:center;width:100%}
+.mapbox{border:1px solid var(--line);border-radius:16px;padding:clamp(13px,1.6vw,24px) clamp(16px,2vw,30px);text-align:center;background:rgba(255,255,255,.03);font-size:clamp(15px,1.6vw,22px);font-weight:700}
+.mapbox .t{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,.98vw,12px);letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:6px;color:var(--faint);font-weight:400}
+.mapbox .sm{display:block;color:var(--faint);font-size:.62em;font-weight:400;margin-top:5px}
+.mapbox .ex{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:11px}
+.mapbox .ex span{font-family:'JetBrains Mono',monospace;font-size:clamp(9.5px,1vw,13px);font-weight:400;padding:5px 11px;border-radius:8px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.03)}
+.mapbox.ki{border-color:var(--ink);background:rgba(243,237,225,.06)}
+.mapbox.sym{border-color:var(--amber);background:rgba(255,178,77,.08)}.mapbox.sym .t{color:var(--amber)}.mapbox.sym .ex span{border-color:rgba(255,178,77,.3)}
+.mapbox.ml{border-color:var(--mint);background:rgba(94,234,212,.08)}.mapbox.ml .t{color:var(--mint)}.mapbox.ml .ex span{border-color:rgba(94,234,212,.3)}
+.mapbox.nn{border-color:var(--mint);background:rgba(94,234,212,.14)}.mapbox.nn .t{color:var(--mint)}.mapbox.nn .ex span{border-color:rgba(94,234,212,.3)}
+.mapbox.mlc{border-color:rgba(94,234,212,.45);background:rgba(94,234,212,.06)}.mapbox.mlc .t{color:var(--mint)}.mapbox.mlc .ex span{border-color:rgba(94,234,212,.3)}
+.mapbranch{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.1vh,14px);flex:1.6;min-width:300px;border:1px dashed rgba(94,234,212,.35);border-radius:20px;padding:clamp(12px,1.4vw,20px);background:rgba(94,234,212,.04)}
+.mapbranch .arrow{font-size:clamp(14px,1.5vw,20px)}
+.mapnote{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.05vw,13px);color:var(--faint);text-align:center;line-height:1.5}
+.mapnote b{color:var(--mint);font-weight:500}
+
+/* training comparison table */
+.traintable{display:flex;flex-direction:column;gap:clamp(8px,1.1vh,14px);width:100%}
+.trow{display:grid;grid-template-columns:minmax(130px,.9fr) 1.2fr 1.4fr;gap:clamp(10px,1.3vw,20px);align-items:center;background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:14px;padding:clamp(11px,1.3vw,20px) clamp(13px,1.5vw,24px)}
+.trow.head{background:transparent;border:none;padding-top:0;padding-bottom:0}
+.trow.head div{font-family:'JetBrains Mono',monospace;font-size:clamp(8.5px,.92vw,11px);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.trow .ty{display:flex;align-items:center;gap:10px;font-weight:800;font-size:clamp(14px,1.45vw,20px)}
+.trow .ty .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:rgba(255,178,77,.14);border:1px solid rgba(255,178,77,.3);flex:none}
+.trow .cell{font-size:clamp(12.5px,1.35vw,18px);color:var(--muted);line-height:1.4}
+.trow .cell b{color:var(--ink);font-weight:600}
+.trow .sig{color:var(--mint)}
+
+/* axes */
+.axes{display:flex;flex-direction:column;gap:clamp(8px,1.3vh,16px);width:100%}
+.axis{display:flex;align-items:center;gap:clamp(12px,1.5vw,22px);flex-wrap:wrap;background:rgba(255,255,255,.025);border:1px solid var(--line-soft);border-radius:14px;padding:clamp(11px,1.3vw,20px) clamp(13px,1.5vw,24px)}
+.axis .albl{flex:0 0 auto;min-width:180px}
+.axis .albl .ax{font-family:'JetBrains Mono',monospace;font-size:clamp(9.5px,1vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:3px}
+.axis .albl .an{font-weight:800;font-size:clamp(15px,1.55vw,22px)}
+.axis .opts{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+.axis .opt{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.2vw,16px);padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted)}
+
+/* risk pyramid */
+.pyr{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}
+.tier{border-radius:12px;padding:clamp(9px,1.2vw,16px) 18px;text-align:center;font-size:clamp(13px,1.35vw,18px);border:1px solid var(--line)}
+.tier .lab{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,.95vw,11px);letter-spacing:.13em;text-transform:uppercase;display:block;margin-bottom:3px}
+.t1{width:48%;background:rgba(244,71,71,.16);border-color:rgba(244,71,71,.5)} .t1 .lab{color:var(--red)}
+.t2{width:66%;background:rgba(255,178,77,.14);border-color:rgba(255,178,77,.45)} .t2 .lab{color:var(--amber)}
+.t3{width:84%;background:rgba(94,234,212,.10);border-color:rgba(94,234,212,.4)} .t3 .lab{color:var(--mint)}
+.t4{width:100%;background:rgba(255,255,255,.04)} .t4 .lab{color:var(--muted)}
+
+/* sources slide */
+.srcwrap{flex:1;min-height:0;overflow-y:auto;padding-right:6px}
+.srcgrid{columns:2;column-gap:42px}
+.srcitem{break-inside:avoid;margin-bottom:13px;font-size:clamp(11.5px,1.15vw,15px);line-height:1.5;padding-left:14px;border-left:2px solid var(--line)}
+.srcitem b{color:var(--amber);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:clamp(10.5px,1.05vw,13px)}
+.srcitem span{color:var(--muted)}
+
+/* ---------- chapter overview overlay ---------- */
+.overlay{position:fixed;inset:0;z-index:30;background:rgba(7,10,14,.93);backdrop-filter:blur(10px);display:none;flex-direction:column;padding:clamp(24px,5vh,60px) clamp(24px,6vw,90px);overflow-y:auto}
+.overlay.show{display:flex}
+.overlay h3{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(24px,3.4vw,42px);margin-bottom:22px}
+.overlay h3 em{font-style:italic;color:var(--amber)}
+.ovchapters{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.ovchap{border:1px solid var(--line);border-radius:16px;padding:18px 20px;cursor:pointer;transition:.18s;background:rgba(255,255,255,.02)}
+.ovchap:hover{border-color:var(--amber);background:rgba(255,178,77,.06)}
+.ovchap.cur{border-color:var(--mint);background:rgba(94,234,212,.07)}
+.ovchap .cn{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.ovchap.cur .cn{color:var(--mint)}
+.ovchap .ct{font-weight:700;font-size:clamp(16px,1.7vw,21px);margin-bottom:7px}
+.ovchap .cl{font-size:13.5px;color:var(--muted);line-height:1.45}
+.overlay .closehint{margin-top:24px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--faint)}
+
+/* ---------- controls ---------- */
+.controls{display:flex;align-items:center;justify-content:center;gap:clamp(6px,1vw,14px);padding:clamp(10px,1.6vh,16px);padding-bottom:max(clamp(10px,1.6vh,16px),env(safe-area-inset-bottom))}
+.btn{font-family:'JetBrains Mono',monospace;font-size:clamp(10.5px,1.05vw,13px);letter-spacing:.05em;background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:10px 15px;border-radius:12px;cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn:hover{color:var(--ink);border-color:var(--amber);background:rgba(255,178,77,.08)}
+.btn.cta{background:linear-gradient(180deg,var(--amber),var(--amber-deep));color:#241400;border:none;font-weight:700}
+.btn.cta:hover{filter:brightness(1.07)}
+.btn.audio.on{border-color:var(--mint);color:var(--mint);background:rgba(94,234,212,.1)}
+.hint{font-family:'JetBrains Mono',monospace;font-size:clamp(9.5px,.92vw,12px);color:var(--faint);letter-spacing:.04em}
+
+/* ---------- portrait / narrow ---------- */
+@media (max-width:980px), (orientation:portrait){
+  .slide.active.content{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:clamp(10px,1.8vh,18px)}
+  .botcol{flex-direction:row;align-items:center;justify-content:flex-start;gap:13px}
+  .botcol .botname,.botcol .agentstatus{display:none}
+  .botcol .speech{flex:1;max-height:30vh}
+  .botcol .speech::after{display:none}
+  .bot{width:clamp(74px,14vw,104px)}
+  .learnlist{grid-template-columns:1fr 1fr}
+  .hint{display:none}
+}
+@media (max-width:640px){
+  .learnlist{grid-template-columns:1fr}
+  .row{flex-direction:column}
+  .vs{display:none}
+  .srcgrid{columns:1}
+  .trow{grid-template-columns:1fr;gap:5px}
+  .trow.head{display:none}
+  .axis .albl{min-width:0;width:100%}
+}
+</style>
+</head>
+<body>
+<canvas id="net"></canvas>
+<div id="stage">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> ADA</div>
+    <div class="chapterbar">
+      <div class="chapterlabel" id="chapterlabel"></div>
+      <div class="progress" id="progress"></div>
+    </div>
+    <div class="counter" id="counter">01 / 01</div>
+  </div>
+  <div class="main" id="main"></div>
+  <div class="controls">
+    <button class="btn" id="prevBtn">← Zurück</button>
+    <button class="btn" id="mapBtn" title="Kapitelübersicht">⊞ Kapitel</button>
+    <button class="btn audio" id="audioBtn">🔈 Vorlesen: aus</button>
+    <button class="btn" id="replayBtn" title="Nochmal vorlesen">↻</button>
+    <span class="hint" id="hint">→ weiter&nbsp;·&nbsp;F = Vollbild</span>
+    <button class="btn cta" id="nextBtn">Weiter →</button>
+  </div>
+</div>
+<div class="overlay" id="overlay">
+  <h3>Wo bin ich? · <em>Kapitelübersicht</em></h3>
+  <div class="ovchapters" id="ovchapters"></div>
+  <div class="closehint">Tippe ein Kapitel an, um dorthin zu springen · Esc oder ⊞ schließt</div>
+</div>
+<script>
+/* ============================================================
+   KAPITEL (Abschnitte) — chapter-Feld jeder Folie verweist hierauf
+   ============================================================ */
+const CHAPTERS=[
+  {id:"start",  name:"Einstieg",                  sub:""},
+  {id:"grund",  name:"Grundlagen",                sub:"Was ist KI — und was nicht?"},
+  {id:"karte",  name:"Die Landkarte der KI",      sub:"Wie die Begriffe zusammenhängen"},
+  {id:"methode",name:"Die zwei Methoden",         sub:"Regeln vs. Lernen aus Daten"},
+  {id:"lernen", name:"Wie Maschinen lernen",      sub:"Lernen, Lernarten, Training"},
+  {id:"netze",  name:"Neuronale Netze",           sub:"Der Motor der modernen KI"},
+  {id:"modern", name:"Der Durchbruch",            sub:"GPUs, Transformer, Sprachmodelle"},
+  {id:"anwend", name:"Anwendungsfelder",          sub:"Sehen, Sprache, Erschaffen"},
+  {id:"agent",  name:"KI-Agenten",                sub:"Von Antworten zu Handeln"},
+  {id:"grenzen",name:"Grenzen & Verantwortung",   sub:"Halluzinationen, gute Prompts"},
+  {id:"regeln", name:"Die Spielregeln",           sub:"Wie Europa KI reguliert"},
+  {id:"ende",   name:"Abschluss",                 sub:"Zusammenfassung & Quellen"}
+];
+const DIMS=["Symbolische KI","Maschinelles Lernen","Die Lernarten","Neuronale Netze"];
+
+/* ============================================================
+   INHALTE — Felder: chapter, kind ('cover'|'section'|'content'|'sources'),
+   eyebrow, dim (1-4 optional), title, say (Bot-Text), viz (Grafik), source.
+   Jede Content-Folie ist auf "passt ohne Scrollen" ausgelegt.
+   ============================================================ */
+const SLIDES=[
+ {chapter:"start",kind:"cover",kicker:"Eine kleine Einführung",
+  title:'Was ist eigentlich <em>Künstliche Intelligenz</em>?',
+  sub:"In ein paar Minuten — ohne Fachchinesisch. Erklärt von einer KI, die selbst weiß, wie sie funktioniert.",
+  say:"Hallo! Ich bin ADA, und ja — ich bin selbst eine KI. Ich nehme dich mit hinter die Kulissen und zeige dir Schritt für Schritt, was hinter diesem großen Wort steckt. Tippe unten auf den Lautsprecher, dann lese ich dir alles vor. Über den Knopf „Kapitel“ siehst du jederzeit, wo du gerade bist. Bereit? Dann los."},
+
+ /* ---------- GRUNDLAGEN ---------- */
+ {chapter:"grund",kind:"section",secnum:"Kapitel 1",
+  title:'Grundlagen',secsub:"Zuerst klären wir, was KI überhaupt ist — und was fälschlich dafür gehalten wird.",
+  say:"Beginnen wir mit den Grundlagen. Was ist KI überhaupt, was ist sie nicht, und warum verschiebt sich das ständig? Diese drei Fragen klären wir jetzt."},
+
+ {chapter:"grund",kind:"content",eyebrow:"Die gesetzliche Definition",
+  title:'Was ist ein <em>KI-System</em>?',
+  say:"Eine perfekte Definition gibt es nicht — aber seit 2024 eine rechtlich verbindliche. Wichtig: Das Gesetz definiert nicht „Künstliche Intelligenz“ als abstrakten Begriff, sondern den konkreten Ausdruck KI-System. Vereinfacht: Ein KI-System ist ein maschinengestütztes System, das mit einer gewissen Eigenständigkeit arbeitet und aus Eingaben ableitet, wie es zu Ergebnissen wie Vorhersagen, Empfehlungen oder Entscheidungen kommt. Das Schlüsselwort ist „ableiten“ — genau das trennt ein KI-System von gewöhnlicher Software.",
+  viz:`<div class="tags">
+     <span class="tag"><b>maschinengestützt</b></span>
+     <span class="tag">gewisse <b>Autonomie</b></span>
+     <span class="tag">kann sich <b>anpassen</b></span>
+     <span class="tag" style="border-color:var(--mint);color:var(--mint)"><b>leitet aus Eingaben ab</b></span>
+     <span class="tag">erzeugt Vorhersagen / <b>Ausgaben</b></span>
+     <span class="tag">beeinflusst die <b>Umgebung</b></span>
+   </div>
+   <div class="exbox"><span class="lead">Worauf es ankommt</span>
+     Der Gesetzestext beschreibt bewusst ein <b>„KI-System“</b> (also das konkrete Produkt/Programm), nicht „die KI“ im Allgemeinen. Geprüft wird das einzelne System anhand dieser Merkmale — Kern ist die Fähigkeit, aus Eingaben selbst abzuleiten.</div>`,
+  source:"<b>Quelle:</b> EU-KI-Verordnung (EU) 2024/1689, Art. 3 Abs. 1 (Begriff „KI-System“); Leitlinien der EU-Kommission zur Definition von KI-Systemen, Feb. 2025."},
+
+ {chapter:"grund",kind:"content",eyebrow:"Eine wichtige Abgrenzung",
+  title:'Nicht alles Automatische ist <em>KI</em>',
+  say:"Das wird oft verwechselt. Ein simples Wenn-Dann-Programm — wenn das Konto gedeckt ist, dann zahle aus — leitet nichts ab. Es führt nur aus, was ihm jemand vorgeschrieben hat. Nach der EU-Definition ist das kein KI-System, egal wie nützlich es ist. Ein KI-System dagegen erarbeitet sich seinen Lösungsweg selbst aus Daten.",
+  viz:`<div class="row">
+     <div class="card a"><h4>Klassisches Programm</h4><p>Folgt festen Regeln, die ein Mensch geschrieben hat. Gleiche Eingabe ergibt immer dieselbe Ausgabe. Es „versteht“ nichts — es <b>rechnet ab</b>.</p></div>
+     <div class="vs">≠</div>
+     <div class="card b"><h4>KI-System</h4><p>Leitet aus Daten selbst ab, wie es zu einem Ergebnis kommt. Die konkrete Regel hat <b>niemand vorgegeben</b> — sie ist gelernt.</p></div>
+   </div>
+   <div class="exbox amber"><span class="lead">Beispiel</span>
+     Ein Taschenrechner oder ein fester Steuer-Rechner ist <b>keine KI</b>. Ein System, das aus tausenden Fällen lernt, welche Steuererklärung auffällig ist, <b>schon</b>.</div>`,
+  source:"<b>Quelle:</b> Leitlinien der EU-Kommission, Feb. 2025 — reine Wenn-Dann-Skripte und einfache Statistik gelten ausdrücklich nicht als KI-System."},
+
+ {chapter:"grund",kind:"content",eyebrow:"Ein kurioser Effekt",
+  title:'Sobald KI <em>funktioniert</em>, wirkt sie nicht mehr wie KI',
+  say:"Ein bekanntes Phänomen: Was gestern noch als Gipfel der Intelligenz galt, ist heute nur noch Rechnen. Schach war einmal der Test für Intelligenz schlechthin — seit der Computer Deep Blue 1997 den amtierenden Weltmeister Garri Kasparow schlug, gilt es als reine Rechenleistung. Genauso bei Texterkennung, Spracherkennung oder dem Spamfilter: alles galt mal als KI, heute ist es Alltag. Man nennt das den KI-Effekt — das Ziel verschiebt sich ständig, sobald etwas funktioniert.",
+  viz:`<div class="flow">
+     <div class="node"><span class="t">früher</span>„Das schafft<br>nur ein Mensch!“</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">KI löst es</span>Es funktioniert</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">danach</span>„Ach, das ist<br>ja nur Rechnen.“</div>
+   </div>
+   <div class="exbox"><span class="lead">Galt einmal als „KI“ — heute Alltag</span>
+     ♟️ Schach (Deep Blue 1997) · 📄 Texterkennung (OCR) · 🎙️ Spracherkennung · ✉️ Spamfilter · 🗺️ Navi-Routenplanung</div>`,
+  source:"<b>Quelle:</b> „KI-Effekt“ / „Tesler's Theorem“ („AI is whatever hasn't been done yet“, L. Tesler); dokumentiert in Hofstadter, „Gödel, Escher, Bach“ (1979) & McCorduck, „Machines Who Think“. Deep Blue vs. Kasparow: IBM, 1997."},
+
+ /* ---------- LANDKARTE ---------- */
+ {chapter:"karte",kind:"section",secnum:"Kapitel 2",
+  title:'Die <em>Landkarte</em> der KI',secsub:"Bevor wir ins Detail gehen: wie alle Begriffe zusammenhängen — sauber verschachtelt.",
+  say:"Jetzt gebe ich dir eine Landkarte, damit du dich zurechtfindest. Du wirst sehen, wie die vielen Begriffe — maschinelles Lernen, Deep Learning, neuronale Netze — ineinander liegen."},
+
+ {chapter:"karte",kind:"content",eyebrow:"Orientierung",
+  title:'Die <em>Landkarte</em>: alles ineinander geschachtelt',
+  say:"Ganz oben steht KI als Überbegriff. Darunter gibt es zwei Zweige. Der erste ist die symbolische KI, bei der Menschen die Regeln vorgeben. Der zweite ist das maschinelle Lernen, bei dem die Maschine aus Daten lernt. Und jetzt das Wichtige: Innerhalb des maschinellen Lernens gibt es wiederum zwei Sorten — das klassische Lernen für Tabellendaten und die neuronalen Netze, das sogenannte Deep Learning. Neuronale Netze sind also ein Teil des maschinellen Lernens, nicht etwas Drittes daneben. Merke dir die Schachtelung: KI enthält maschinelles Lernen, und maschinelles Lernen enthält die neuronalen Netze.",
+  viz:`<div class="map">
+     <div class="mapbox ki" style="min-width:300px"><span class="t">Der Überbegriff</span>Künstliche Intelligenz
+       <span class="sm">jedes System, das aus Eingaben ableitet</span></div>
+     <div class="arrow">↓ teilt sich in zwei Zweige ↓</div>
+     <div class="maprow" style="align-items:stretch">
+       <div class="mapbox sym" style="flex:1;display:flex;flex-direction:column;justify-content:center"><span class="t">Zweig 1</span>Symbolische KI
+         <span class="sm">Regeln vom Menschen vorgegeben</span></div>
+       <div class="mapbranch">
+         <div class="mapbox ml" style="width:100%"><span class="t">Zweig 2</span>Maschinelles Lernen<span class="sm">lernt selbst aus Daten</span></div>
+         <div class="arrow">↓ enthält ↓</div>
+         <div class="maprow">
+           <div class="mapbox mlc" style="flex:1"><span class="t">2a · klassisch</span>Klassisches ML<span class="sm">Tabellendaten</span></div>
+           <div class="mapbox nn" style="flex:1"><span class="t">2b · tief</span>Neuronale Netze<span class="sm">„Deep Learning“</span></div>
+         </div>
+       </div>
+     </div>
+     <div class="mapnote">Schachtelung: <b>KI ⊃ Maschinelles Lernen ⊃ Neuronale Netze.</b> Die Beispiele (CNN, XGBoost …) erkläre ich gleich.</div>
+   </div>`,
+  source:"<b>Einordnung:</b> KI ⊃ Maschinelles Lernen ⊃ neuronale Netze (Deep Learning). Vgl. Russell & Norvig, „AI: A Modern Approach“; IBM, „What is AI / machine learning“ (2024)."},
+
+ /* ---------- METHODEN ---------- */
+ {chapter:"methode",kind:"content",eyebrow:"Methode 1 · von Hand",dim:1,
+  title:'Symbolische KI: <em>Wissen in Regeln gegossen</em>',
+  say:"Schauen wir die erste Methode an, die älteste. Bei der symbolischen KI gießen Fachleute ihr Wissen in tausende ausdrückliche Regeln. Eine sogenannte Inferenz-Maschine zieht daraus logische Schlüsse. Das Medizin-System MYCIN aus den siebziger Jahren hatte rund fünfhundert solcher Regeln und diagnostizierte Infektionen — in Tests fast so gut wie ein Spezialist. Der große Vorteil: Jeder Schritt ist nachvollziehbar. Der Haken: Jede Regel muss ein Mensch von Hand schreiben, und das System wird schnell starr.",
+  viz:`<div class="flow">
+     <div class="node"><span class="t">Wissensbasis</span>~500 Regeln<br>„WENN … DANN …“</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">Inferenz-Maschine</span>zieht logische<br>Schlüsse</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">Ergebnis</span>Diagnose +<br>Begründung</div>
+   </div>
+   <div class="row">
+     <div class="card a"><h4>Stark</h4><p>Jede Entscheidung ist <b>nachvollziehbar begründbar</b> — wichtig in Medizin und Recht.</p></div>
+     <div class="card r"><h4>Schwach</h4><p>Regeln müssen <b>von Hand</b> geschrieben werden; bei Ausnahmen wird das System starr.</p></div>
+   </div>`,
+  source:"<b>Quelle:</b> MYCIN, Stanford University (E. Shortliffe u.a.), ab 1972; Buchanan & Shortliffe, „Rule-Based Expert Systems“ (Addison-Wesley, 1984)."},
+
+ {chapter:"methode",kind:"content",eyebrow:"Methode 2 · aus Daten",dim:2,
+  title:'Maschinelles Lernen: <em>aus Beispielen lernen</em>',
+  say:"Die zweite Methode ist das maschinelle Lernen — der Ansatz, der heute dominiert. Hier bekommt das System keine Regeln, sondern Beispiele. Bleiben wir beim Beispiel Spamfilter: Er sieht zehntausende E-Mails, jede markiert als Spam oder kein Spam. Daraus lernt er selbst, welche Merkmale auf Spam hindeuten, und entscheidet dann bei einer neuen, nie gesehenen Mail. Niemand hat ihm eine feste Regel wie „enthält das Wort Gewinnspiel“ vorgeschrieben. Wichtig zu wissen: Nicht alles davon sind neuronale Netze — die klassischen Verfahren schauen wir uns gleich an.",
+  viz:`<div class="flow">
+     <div class="node">✉️ ✉️ ✉️<br><span class="t" style="margin-top:6px">10.000 markierte Mails</span></div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">Training</span>Muster selbst<br>erkennen</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">neue Mail</span>„Das ist<br>Spam.“</div>
+   </div>
+   <div class="exbox"><span class="lead">Der Kern</span>
+     Statt fester Regeln lernt das System aus <b>Beispielen mit bekanntem Ergebnis</b> und verallgemeinert auf neue Fälle. Genau das ist „maschinelles Lernen“.</div>`,
+  source:"<b>Hinweis:</b> Klassisches maschinelles Lernen (z. B. Entscheidungsbäume) ist bei Tabellendaten weiterhin Stand der Technik — „KI“ ist nicht gleich „Deep Learning“. Vgl. IBM, „What is machine learning“ (2024)."},
+
+ {chapter:"methode",kind:"content",eyebrow:"Methode 2 · die Werkzeuge",dim:2,
+  title:'Klassisches ML: die <em>wichtigsten Verfahren</em>',
+  say:"Sehen wir uns die klassischen Werkzeuge des maschinellen Lernens an — die, die ohne neuronale Netze auskommen und bei Tabellendaten oft am besten sind. Ein Entscheidungsbaum stellt nacheinander Ja-Nein-Fragen, wie ein Flussdiagramm: Ist das Einkommen über X? Gibt es Schulden? Am Ende steht eine Entscheidung. Ein Random Forest kombiniert viele solcher Bäume und lässt sie abstimmen — das ist robuster. XGBoost baut die Bäume schrittweise so, dass jeder neue Baum die Fehler der vorigen ausbessert; das ist bei Tabellendaten oft das treffsicherste Verfahren überhaupt. Und Clustering gruppiert Daten ganz ohne Vorgaben nach Ähnlichkeit, etwa um Kundengruppen zu finden.",
+  viz:`<div class="learnlist">
+     <div class="learn"><div class="h"><span class="ic">🌳</span>Entscheidungsbaum</div><p>Eine Kette von <b>Ja-/Nein-Fragen</b> wie ein Flussdiagramm. Sehr gut nachvollziehbar.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🌲</span>Random Forest</div><p>Viele Bäume, jeder auf einer <b>zufälligen Stichprobe</b> der Daten und Merkmale. Ihre Mehrheit mittelt Fehler aus → genauer & stabiler.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🚀</span>XGBoost</div><p>Bäume werden <b>nacheinander</b> gebaut, jeder bessert die Fehler des vorigen aus. Top bei Tabellendaten.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🧩</span>Clustering</div><p>Gruppiert Daten <b>ohne Vorgaben</b> nach Ähnlichkeit — z. B. Kundensegmente.</p></div>
+   </div>`,
+  source:"<b>Quellen:</b> Breiman, „Random Forests“, Machine Learning 45 (2001); Chen & Guestrin, „XGBoost“, ACM SIGKDD 2016; Standarddarstellung in Russell & Norvig."},
+
+ /* ---------- LERNEN ---------- */
+ {chapter:"lernen",kind:"section",secnum:"Kapitel 3",
+  title:'Wie Maschinen <em>lernen</em>',secsub:"Was „lernen“ wirklich heißt, die vier Lernarten und wie das Training abläuft.",
+  say:"Jetzt kommt das Herzstück: Wie lernt eine Maschine eigentlich? Wir entzaubern das Wort „lernen“, schauen die vier Lernarten an und sehen, wie das Training konkret abläuft."},
+
+ {chapter:"lernen",kind:"content",eyebrow:"Entzaubert",dim:2,
+  title:'Was „<em>lernen</em>“ für eine Maschine bedeutet',
+  say:"Lernen klingt geheimnisvoll, ist im Kern aber einfach. Nehmen wir die Mietpreis-Schätzung. Das System bekommt viele Wohnungen mit bekannter Miete: Größe, Lage, Baujahr und der echte Preis. Daraus sucht es eine Formel, die aus den Merkmalen den Preis möglichst gut trifft. Bei einer neuen, nie gesehenen Wohnung wendet es diese Formel an und schätzt die Miete. Wenn das auch bei neuen Fällen gut klappt, nennt man das Verallgemeinern — das ist das eigentliche Ziel. Lernt das System die Beispiele dagegen nur auswendig und versagt bei allem Neuen, spricht man von Überanpassung.",
+  viz:`<div class="flow">
+     <div class="node"><span class="t">Eingabe (Merkmale)</span>75 m² · gute Lage<br>· Baujahr 2010</div>
+     <span class="arrow">→</span>
+     <div class="node" style="border-color:var(--mint)"><span class="t">gelernte Formel</span>aus tausenden<br>Wohnungen</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">Schätzung</span>~ 1.100 €<br>Miete</div>
+   </div>
+   <div class="row">
+     <div class="card b"><h4>Verallgemeinern ✓</h4><p>Erkennt das <b>Muster</b> und liegt auch bei neuen Wohnungen richtig.</p></div>
+     <div class="card r"><h4>Überanpassung ✗</h4><p>Hat die Beispiele nur <b>auswendig</b> gelernt — und scheitert an allem Neuen.</p></div>
+   </div>`,
+  source:"<b>Konzept:</b> Überwachtes Lernen als Funktionsannäherung; Verallgemeinerung vs. Overfitting — Standarddarstellung in Russell & Norvig, „AI: A Modern Approach“."},
+
+ {chapter:"lernen",kind:"content",eyebrow:"Vier Arten zu lernen",dim:3,
+  title:'Die vier <em>Lernarten</em>',
+  say:"Es gibt vier Grundtypen, wie ein System lernt. Überwachtes Lernen heißt: mit Lösungsblatt — Beispiele samt richtiger Antwort, etwa für einen Spamfilter. Unüberwachtes Lernen findet Muster ganz ohne Lösungen, etwa um Kundengruppen zu entdecken. Bestärkendes Lernen funktioniert über Belohnung und Strafe, wie beim Hundetraining — so wurde das Go-Programm AlphaGo Weltklasse. Und selbstüberwachtes Lernen ist der Trick hinter Sprachmodellen wie mir: Der Text liefert sich die Aufgaben selbst, indem immer das nächste Wort verdeckt und vorhergesagt wird. Merk dir diese vier — sie kommen gleich beim Training wieder.",
+  viz:`<div class="learnlist">
+     <div class="learn"><div class="h"><span class="ic">📝</span>Überwacht</div><p>Lernen <b>mit Lösungsblatt</b>: Beispiele samt richtiger Antwort. → Spamfilter, Bilderkennung, Preisprognose.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🧩</span>Unüberwacht</div><p>Muster <b>ohne Lösungen</b> finden. → Kundengruppen entdecken, Anomalien aufspüren.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🎯</span>Bestärkend</div><p>Lernen durch <b>Belohnung & Strafe</b>, wie beim Hundetraining. → AlphaGo, Robotik, Steuerung.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🔁</span>Selbstüberwacht</div><p>Der Text liefert die Aufgaben <b>selbst</b>: „Sag das nächste Wort voraus.“ → Grundlage von ChatGPT.</p></div>
+   </div>`,
+  source:"<b>Quellen:</b> Überblick der Lernparadigmen — Russell & Norvig, „AI: A Modern Approach“; Goodfellow, Bengio & Courville, „Deep Learning“ (MIT Press, 2016). Bestärkendes Lernen / AlphaGo: Silver u.a., Nature 529 (2016); Lehrbuch: Sutton & Barto, „Reinforcement Learning“ (2018)."},
+
+ {chapter:"lernen",kind:"content",eyebrow:"Konkret",dim:3,
+  title:'Wie das Training je <em>Lernart</em> abläuft',
+  say:"Jetzt konkret: Wie unterscheidet sich das Training? Beim überwachten Lernen bekommt das System Beispiele mit Lösung und verkleinert seinen Fehler zur Lösung. Beim unüberwachten Lernen gibt es keine Lösungen — es gruppiert nur nach Ähnlichkeit. Beim bestärkenden Lernen probiert es Aktionen aus und lernt aus Belohnung, ganz wie durch Versuch und Irrtum. Und beim selbstüberwachten Lernen versteckt es ein Wort im Text und sagt es voraus — die Lösung steht ja schon da. Vier Lernarten, vier ganz unterschiedliche Trainingssignale.",
+  viz:`<div class="traintable">
+     <div class="trow head"><div>Lernart</div><div>bekommt …</div><div>lernt durch …</div></div>
+     <div class="trow"><div class="ty"><span class="ic">📝</span>Überwacht</div>
+       <div class="cell">Beispiele <b>mit</b> richtiger Lösung</div>
+       <div class="cell"><span class="sig">Fehler zur Lösung verkleinern</span> · z. B. Spamfilter</div></div>
+     <div class="trow"><div class="ty"><span class="ic">🧩</span>Unüberwacht</div>
+       <div class="cell">Daten <b>ohne</b> Lösung</div>
+       <div class="cell"><span class="sig">nach Ähnlichkeit gruppieren</span> · z. B. Kundensegmente</div></div>
+     <div class="trow"><div class="ty"><span class="ic">🎯</span>Bestärkend</div>
+       <div class="cell">Umgebung + <b>Belohnung</b></div>
+       <div class="cell"><span class="sig">Versuch & Irrtum, Belohnung maximieren</span> · z. B. AlphaGo</div></div>
+     <div class="trow"><div class="ty"><span class="ic">🔁</span>Selbstüberwacht</div>
+       <div class="cell">nur <b>Rohtext</b> (keine Labels)</div>
+       <div class="cell"><span class="sig">verdecktes Wort vorhersagen</span> · z. B. ChatGPT</div></div>
+   </div>`,
+  source:"<b>Einordnung:</b> Selbstüberwachtes Lernen erzeugt die „Lösungen“ automatisch aus den Daten und macht so das Training auf riesigen Textmengen möglich (Grundlage moderner Sprachmodelle)."},
+
+ /* ---------- NEURONALE NETZE ---------- */
+ {chapter:"netze",kind:"section",secnum:"Kapitel 4",
+  title:'Neuronale <em>Netze</em>',secsub:"Der Motor der modernen KI — von einem Neuron bis zum tiefen Netz.",
+  say:"Kommen wir zum Motor der modernen KI: den neuronalen Netzen. Wir bauen sie von Grund auf — ein einzelnes Neuron, dann das ganze Netz, dann das Training."},
+
+ {chapter:"netze",kind:"content",eyebrow:"Der Baustein",dim:4,
+  title:'Ein künstliches <em>Neuron</em> — die Mathematik dahinter',
+  say:"Fangen wir beim kleinsten Baustein an, dem künstlichen Neuron. Keine Angst vor der Mathematik, sie ist erstaunlich einfach. Das Neuron bekommt mehrere Eingaben, im Beispiel x1, x2, x3. Jede Eingabe hat ein Gewicht — w1, w2, w3 —, das angibt, wie wichtig sie ist. Das Neuron multipliziert jede Eingabe mit ihrem Gewicht und zählt alles zusammen. Dann addiert es noch einen festen Wert, den Bias. Der Bias ist hier keine Verzerrung, sondern schlicht ein Schwellenwert: Er verschiebt, ab wann das Neuron überhaupt reagiert — so wie ein Mindestmaß, das erreicht sein muss. Heraus kommt eine Summe. Diese Summe schickt das Neuron durch eine Aktivierungsfunktion. Warum? Weil ohne sie das ganze Netz nur eine einzige große lineare Rechnung wäre und keine komplexen Muster lernen könnte. Die Aktivierungsfunktion biegt das Signal, lässt das Neuron erst ab einer gewissen Stärke feuern und macht das Netz dadurch erst leistungsfähig. Lernen heißt später nichts anderes, als die Gewichte und den Bias so einzustellen, dass am Ende das Richtige herauskommt.",
+  viz:`<div class="svgwrap"><svg viewBox="0 0 760 250">
+     <text x="60" y="40" fill="#9aa6b6" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Eingaben</text>
+     <text x="60" y="58" fill="#5d6877" font-size="11" text-anchor="middle" font-family="JetBrains Mono">× Gewicht</text>
+     <g font-family="JetBrains Mono" font-size="14">
+       <circle cx="60" cy="90" r="20" fill="#161c25" stroke="#5eead4"/><text x="60" y="95" fill="#f3ede1" text-anchor="middle">x₁</text>
+       <circle cx="60" cy="150" r="20" fill="#161c25" stroke="#5eead4"/><text x="60" y="155" fill="#f3ede1" text-anchor="middle">x₂</text>
+       <circle cx="60" cy="210" r="20" fill="#161c25" stroke="#5eead4"/><text x="60" y="215" fill="#f3ede1" text-anchor="middle">x₃</text>
+     </g>
+     <line x1="82" y1="95" x2="300" y2="145" stroke="#5eead4" stroke-width="1.6" opacity=".7"/>
+     <line x1="82" y1="150" x2="300" y2="150" stroke="#5eead4" stroke-width="1.6" opacity=".7"/>
+     <line x1="82" y1="205" x2="300" y2="155" stroke="#5eead4" stroke-width="1.6" opacity=".7"/>
+     <text x="175" y="108" fill="#ffb24d" font-size="12" font-family="JetBrains Mono">w₁</text>
+     <text x="180" y="143" fill="#ffb24d" font-size="12" font-family="JetBrains Mono">w₂</text>
+     <text x="175" y="192" fill="#ffb24d" font-size="12" font-family="JetBrains Mono">w₃</text>
+     <circle cx="340" cy="150" r="46" fill="#1a222e" stroke="#ffb24d" stroke-width="2.6"/>
+     <text x="340" y="145" fill="#ffb24d" font-size="15" text-anchor="middle" font-family="JetBrains Mono">Σ wᵢxᵢ</text>
+     <text x="340" y="166" fill="#9aa6b6" font-size="12" text-anchor="middle" font-family="JetBrains Mono">+ bias</text>
+     <line x1="386" y1="150" x2="478" y2="150" stroke="#ffb24d" stroke-width="2.2"/>
+     <rect x="478" y="124" width="104" height="52" rx="10" fill="#161c25" stroke="#5eead4"/>
+     <text x="530" y="147" fill="#5eead4" font-size="12" text-anchor="middle" font-family="JetBrains Mono">Aktivierung</text>
+     <text x="530" y="164" fill="#9aa6b6" font-size="11" text-anchor="middle" font-family="JetBrains Mono">f( )</text>
+     <line x1="582" y1="150" x2="660" y2="150" stroke="#ffb24d" stroke-width="2.2"/>
+     <circle cx="682" cy="150" r="18" fill="#161c25" stroke="#ffb24d"/>
+     <text x="682" y="120" fill="#9aa6b6" font-size="12" text-anchor="middle" font-family="JetBrains Mono">Ausgabe</text>
+   </svg></div>
+   <div class="row">
+     <div class="card a"><h4>Bias = Schwellenwert</h4><p>Ein fester Zusatzwert (keine „Verzerrung“!). Er verschiebt, <b>ab wann</b> das Neuron reagiert.</p></div>
+     <div class="card b"><h4>Aktivierung = warum?</h4><p>Ohne sie wäre das Netz nur eine große lineare Rechnung. Sie <b>biegt</b> das Signal — erst so lernt das Netz komplexe Muster.</p></div>
+   </div>`,
+  source:"<b>Quelle:</b> Erstes Neuronen-Modell — McCulloch & Pitts, Bulletin of Mathematical Biophysics (1943); lernfähiges Perzeptron — Rosenblatt, Psychological Review (1958)."},
+
+ {chapter:"netze",kind:"content",eyebrow:"Vom Neuron zum Netz",dim:4,
+  title:'Wie ein <em>neuronales Netz</em> aufgebaut ist',
+  say:"Ein einzelnes Neuron kann wenig. Die Stärke entsteht, wenn man Millionen davon in Schichten anordnet. Ganz links die Eingabeschicht, die die Daten aufnimmt — etwa die Pixel eines Bildes. Dann mehrere verborgene Schichten in der Mitte, die die eigentliche Arbeit machen. Und rechts die Ausgabeschicht mit dem Ergebnis. Jedes Neuron einer Schicht ist mit den Neuronen der nächsten verbunden. Hat ein Netz viele verborgene Schichten, nennt man es tief — daher der Begriff Deep Learning. Das Schöne: Frühe Schichten lernen einfache Dinge wie Kanten, mittlere setzen sie zu Formen zusammen, späte erkennen ganze Objekte. Diese Begriffe — Eingabeschicht, verborgene Schicht, Ausgabeschicht — solltest du dir merken.",
+  viz:`<div class="svgwrap"><svg viewBox="0 0 660 230">
+     <text x="80" y="24" fill="#5eead4" font-size="12" text-anchor="middle" font-family="JetBrains Mono">Eingabe-</text>
+     <text x="80" y="40" fill="#5eead4" font-size="12" text-anchor="middle" font-family="JetBrains Mono">schicht</text>
+     <text x="330" y="24" fill="#9aa6b6" font-size="12" text-anchor="middle" font-family="JetBrains Mono">verborgene Schichten</text>
+     <text x="585" y="24" fill="#ffb24d" font-size="12" text-anchor="middle" font-family="JetBrains Mono">Ausgabe</text>
+     <g stroke="rgba(94,234,212,.28)" stroke-width="1">
+       <!-- input to h1 -->
+       <line x1="80" y1="80" x2="240" y2="70"/><line x1="80" y1="80" x2="240" y2="130"/><line x1="80" y1="80" x2="240" y2="190"/>
+       <line x1="80" y1="140" x2="240" y2="70"/><line x1="80" y1="140" x2="240" y2="130"/><line x1="80" y1="140" x2="240" y2="190"/>
+       <line x1="80" y1="200" x2="240" y2="70"/><line x1="80" y1="200" x2="240" y2="130"/><line x1="80" y1="200" x2="240" y2="190"/>
+       <!-- h1 to h2 -->
+       <line x1="240" y1="70" x2="420" y2="70"/><line x1="240" y1="70" x2="420" y2="130"/><line x1="240" y1="70" x2="420" y2="190"/>
+       <line x1="240" y1="130" x2="420" y2="70"/><line x1="240" y1="130" x2="420" y2="130"/><line x1="240" y1="130" x2="420" y2="190"/>
+       <line x1="240" y1="190" x2="420" y2="70"/><line x1="240" y1="190" x2="420" y2="130"/><line x1="240" y1="190" x2="420" y2="190"/>
+     </g>
+     <g stroke="rgba(255,178,77,.5)" stroke-width="1.4">
+       <line x1="420" y1="70" x2="585" y2="135"/><line x1="420" y1="130" x2="585" y2="135"/><line x1="420" y1="190" x2="585" y2="135"/>
+     </g>
+     <g fill="#161c25">
+       <circle cx="80" cy="80" r="15" stroke="#5eead4" stroke-width="1.6"/><circle cx="80" cy="140" r="15" stroke="#5eead4" stroke-width="1.6"/><circle cx="80" cy="200" r="15" stroke="#5eead4" stroke-width="1.6"/>
+       <circle cx="240" cy="70" r="15" stroke="#9aa6b6" stroke-width="1.4"/><circle cx="240" cy="130" r="15" stroke="#9aa6b6" stroke-width="1.4"/><circle cx="240" cy="190" r="15" stroke="#9aa6b6" stroke-width="1.4"/>
+       <circle cx="420" cy="70" r="15" stroke="#9aa6b6" stroke-width="1.4"/><circle cx="420" cy="130" r="15" stroke="#9aa6b6" stroke-width="1.4"/><circle cx="420" cy="190" r="15" stroke="#9aa6b6" stroke-width="1.4"/>
+       <circle cx="585" cy="135" r="17" stroke="#ffb24d" stroke-width="2.2"/>
+     </g>
+   </svg></div>
+   <div class="exbox"><span class="lead">Begriffe zum Merken</span>
+     <b>Eingabeschicht</b> (nimmt Daten auf) · <b>verborgene Schichten</b> (die Rechenarbeit) · <b>Ausgabeschicht</b> (Ergebnis). Viele verborgene Schichten = „tief“ = <b>Deep Learning</b>.</div>`,
+  source:"<b>Quelle:</b> Mehrschichtige Netze & Deep Learning — LeCun, Bengio & Hinton, „Deep Learning“, Nature 521 (2015)."},
+
+ {chapter:"netze",kind:"content",eyebrow:"Wie trainiert wird",dim:4,
+  title:'Üben, Fehler messen, <em>nachjustieren</em>',
+  say:"Wie lernt so ein Netz nun? Durch Üben mit Korrektur — und das lässt sich an einer kleinen Rechnung zeigen. Das Netz soll erkennen: Ist auf dem Bild eine Katze? Die richtige Antwort ist Ja, also der Zielwert 1,0. Das Netz ist sich aber erst unsicher und gibt 0,7 aus. Der Fehler ist die Abweichung: Ziel minus Vorhersage, also 1,0 minus 0,7 gleich 0,3. Diese 0,3 sind das Korrektursignal. Nun verteilt das Netz diesen Fehler rückwärts durch alle Schichten und fragt für jedes Gewicht: Wie stark hast du zu diesem Fehler beigetragen? Jedes Gewicht wird dann ein winziges Stück in die Richtung verschoben, die den Fehler verkleinert. Dieses Rückwärts-Verteilen heißt Backpropagation. Beim nächsten Versuch sagt das Netz vielleicht 0,8 — der Fehler ist auf 0,2 gesunken. Millionenfach wiederholt, geht der Fehler gegen null.",
+  viz:`<div class="flow">
+     <div class="node"><span class="t">1 · Vorhersage</span>Netz sagt<br><b style="color:var(--amber)">0,7</b></div><span class="arrow">→</span>
+     <div class="node"><span class="t">2 · Ziel</span>richtig wäre<br><b style="color:var(--mint)">1,0</b></div><span class="arrow">→</span>
+     <div class="node" style="border-color:var(--amber)"><span class="t">3 · Fehler</span>1,0 − 0,7<br>= <b style="color:var(--amber)">0,3</b></div><span class="arrow">→</span>
+     <div class="node"><span class="t">4 · Backprop.</span>Fehler rückwärts<br>verteilen</div><span class="arrow">→</span>
+     <div class="node"><span class="t">5 · Update</span>Gewichte<br>anpassen</div>
+   </div>
+   <div class="exbox"><span class="lead">Der Kreislauf — mit jeder Runde kleiner</span>
+     Runde 1: Vorhersage 0,7 → Fehler 0,3.&nbsp;&nbsp;Runde 2: 0,8 → 0,2.&nbsp;&nbsp;Runde 3: 0,9 → 0,1 … <b>Millionen Mal</b>, bis der Fehler fast null ist.</div>`,
+  source:"<b>Quelle:</b> Rumelhart, Hinton & Williams, „Learning representations by back-propagating errors“, Nature 323 (1986). (Vereinfachtes Zahlenbeispiel zur Veranschaulichung.)"},
+
+ /* ---------- MODERN ---------- */
+ {chapter:"modern",kind:"section",secnum:"Kapitel 5",
+  title:'Der <em>Durchbruch</em>',secsub:"Warum KI gerade jetzt explodierte: Daten, GPUs, der Transformer und Sprachmodelle.",
+  say:"Jetzt zur spannenden Frage: Warum ist KI ausgerechnet in den letzten Jahren explodiert? Drei Zutaten kamen zusammen — Daten, Rechenleistung und eine neue Bauweise namens Transformer."},
+
+ {chapter:"modern",kind:"content",eyebrow:"Der Durchbruch",
+  title:'2012: plötzlich <em>funktioniert</em> es',
+  say:"Lange klappte all das nur mäßig. 2012 kam der Wendepunkt. Es gab einen jährlichen Wettbewerb namens ImageNet, bei dem Programme rund 1,2 Millionen Fotos in tausend Kategorien einsortieren mussten — also für jedes Bild sagen: Ist das ein Hund, ein Auto, eine Erdbeere? Gemessen wurde der Top-5-Fehler: Wie oft lag das Programm daneben, wenn es fünf Rateversuche pro Bild hatte. Ein Team stellte ein tiefes neuronales Netz namens AlexNet vor — und gewann haushoch. AlexNet erreichte einen Fehler von 15,3 Prozent, der Zweitplatzierte mit klassischen Methoden lag bei 26,2. Ein Sprung von fast elf Punkten auf einen Schlag, der die Fachwelt aufrüttelte. Der Grund war kein Wunder, sondern zwei Zutaten, die endlich zusammenkamen: riesige Datenmengen und schnelle Grafikchips, sogenannte GPUs. Warum gerade GPUs, sehen wir auf der nächsten Folie.",
+  viz:`<div class="exbox"><span class="lead">Was war der ImageNet-Wettbewerb?</span>
+     Programme mussten <b>~1,2 Millionen Fotos</b> in <b>1000 Kategorien</b> einordnen (Hund? Auto? Erdbeere?). Gemessen: der <b>Top-5-Fehler</b> — wie oft die richtige Kategorie nicht unter den fünf besten Tipps war.</div>
+   <div class="row">
+     <div class="card b"><h4>Daten</h4><p>ImageNet lieferte <b>Millionen beschrifteter Bilder</b> zum Üben.</p></div>
+     <div class="card a"><h4>GPUs</h4><p>Machten das Training tiefer Netze <b>schnell genug</b> — warum, gleich.</p></div>
+     <div class="card b"><h4>Ergebnis</h4><p>AlexNet: <b>15,3 %</b> Fehler vs. <b>26,2 %</b> beim Zweiten.</p></div>
+   </div>`,
+  source:"<b>Quelle:</b> Krizhevsky, Sutskever & Hinton, „ImageNet Classification with Deep CNNs“, NeurIPS 2012; ImageNet/ILSVRC 2012, Top-5-Fehler 15,3 % vs. 26,2 %."},
+
+ {chapter:"modern",kind:"content",eyebrow:"Warum Grafikchips?",
+  title:'Viele kleine Helfer schlagen <em>wenige Große</em>',
+  say:"Hier die versprochene Erklärung, warum ausgerechnet Grafikchips. Ein neuronales Netz besteht aus Millionen gleichartiger, einfacher Rechnungen — vor allem Multiplizieren und Addieren —, und die lassen sich alle gleichzeitig erledigen. Ein normaler Prozessor, die CPU, hat wenige, sehr starke Kerne; er rechnet die Dinge eher nacheinander ab. Eine Grafikkarte, die GPU, hat dagegen tausende einfache Kerne, die parallel arbeiten. Stell dir vor, eine Million Pixel einzufärben: Die CPU geht sie der Reihe nach durch, die GPU macht fast alles auf einmal. Genau dieses „viele gleiche Rechnungen gleichzeitig“ ist exakt das, was ein neuronales Netz braucht.",
+  viz:`<div class="row">
+     <div class="card a"><h4>CPU · Prozessor</h4><p>Wenige (oft 8–64), sehr <b>starke</b> Kerne. Ideal für vielfältige Aufgaben <b>nacheinander</b>.</p></div>
+     <div class="vs">vs</div>
+     <div class="card b"><h4>GPU · Grafikchip</h4><p><b>Tausende</b> einfache Kerne. Ideal, um sehr viele gleiche Rechnungen <b>gleichzeitig</b> zu erledigen.</p></div>
+   </div>
+   <div class="exbox"><span class="lead">Beispiel</span>
+     Eine moderne KI-GPU (NVIDIA H100) hat über <b>16.000 Rechenkerne</b>. Genau dieses massenhaft-parallele Rechnen passt perfekt zu neuronalen Netzen.</div>`,
+  source:"<b>Quelle:</b> NVIDIA H100-Datenblatt (16.896 FP32-Kerne, spezialisierte „Tensor Cores“ für die Matrix-Rechnungen neuronaler Netze)."},
+
+ {chapter:"modern",kind:"content",eyebrow:"Der Motor von heute",
+  title:'2017: der <em>Transformer</em>',
+  say:"2017 stellte Google eine neue Bauweise vor: den Transformer. Sein Trick heißt Attention, zu Deutsch Aufmerksamkeit. Die Idee: Um ein Wort zu verstehen, schaut das Modell auf alle anderen Wörter im Satz und gewichtet, welche dafür wichtig sind. Nimm den Satz: Die Bank am Fluss. Das Wort Bank ist mehrdeutig — Geldhaus oder Sitzbank? Erst das Wort Fluss verrät die Bedeutung. Der Transformer lässt Bank genau auf Fluss schauen, gewichtet diese Verbindung stark und erkennt: gemeint ist das Ufer. Dieses gezielte Aufeinander-Schauen über den ganzen Satz hinweg ist der Kern. Wie das technisch funktioniert, zeige ich gleich.",
+  viz:`<div class="svgwrap"><svg viewBox="0 0 660 210">
+     <g font-family="JetBrains Mono" font-size="17" text-anchor="middle">
+     <rect x="50" y="80" width="130" height="46" rx="11" fill="#1a222e" stroke="#ffb24d" stroke-width="2.6"/><text x="115" y="109" fill="#ffb24d">Bank</text>
+     <rect x="270" y="80" width="120" height="46" rx="11" fill="#1a222e" stroke="#5eead4"/><text x="330" y="109" fill="#f3ede1">am</text>
+     <rect x="480" y="80" width="130" height="46" rx="11" fill="#1a222e" stroke="#5eead4" stroke-width="2.2"/><text x="545" y="109" fill="#5eead4">Fluss</text>
+     </g>
+     <path d="M180 100 Q345 30 480 100" fill="none" stroke="#ffb24d" stroke-width="3" opacity=".95"/>
+     <text x="345" y="40" fill="#ffb24d" font-size="13" text-anchor="middle" font-family="JetBrains Mono">„Bank“ schaut stark auf „Fluss“</text>
+     <text x="330" y="175" fill="#9aa6b6" font-size="14" text-anchor="middle" font-family="JetBrains Mono">→ also ist das Ufer gemeint, nicht das Geldhaus</text>
+   </svg></div>
+   <div class="exbox"><span class="lead">In einem Satz</span>
+     Attention = jedes Wort schaut auf alle anderen und <b>gewichtet, welche für seine Bedeutung wichtig sind</b>. Das ist der Motor hinter ChatGPT & Co.</div>`,
+  source:"<b>Quelle:</b> Vaswani u.a., „Attention Is All You Need“, NeurIPS 2017."},
+
+ {chapter:"modern",kind:"content",eyebrow:"Im Inneren des Transformers",
+  title:'Wie <em>Attention</em> tatsächlich funktioniert',
+  say:"Schauen wir genauer hinein — ganz ohne Formeln. Damit jedes Wort auf die anderen schauen kann, bildet das Modell zu jedem Wort drei Versionen. Stell dir eine Bibliothek vor. Erstens die Query, die Anfrage: Wonach sucht dieses Wort? Zweitens der Key, das Etikett: Wofür steht dieses Wort? Drittens der Value, der Inhalt: Welche Information trägt es bei? Das Modell vergleicht jede Anfrage mit allen Etiketten und holt sich von den passenden Wörtern den Inhalt. Das macht es nicht nur einmal, sondern in mehreren Blickwinkeln gleichzeitig — Multi-Head. Weil alle Wörter parallel verarbeitet werden, muss die Reihenfolge extra mitgegeben werden, über die Positionskodierung. Und viele solcher Schichten gestapelt erfassen immer abstraktere Zusammenhänge.",
+  viz:`<div class="row">
+     <div class="card b"><h4>Query · die Anfrage</h4><p>Wonach <b>sucht</b> das Wort? („Ich bin ein Verb — wo ist mein Subjekt?“)</p></div>
+     <div class="card b"><h4>Key · das Etikett</h4><p>Wofür <b>steht</b> das Wort? Passt eine Anfrage dazu, wird es wichtig.</p></div>
+     <div class="card a"><h4>Value · der Inhalt</h4><p>Welche <b>Information</b> steuert das Wort bei, wenn es als wichtig erkannt wurde?</p></div>
+   </div>
+   <div class="row">
+     <div class="card a"><h4>Multi-Head</h4><p>Mehrere <b>Blickwinkel parallel</b> — einer auf Grammatik, einer auf Bedeutung.</p></div>
+     <div class="card b"><h4>Positionskodierung</h4><p>Da alles gleichzeitig läuft, wird die <b>Wortreihenfolge</b> eigens mitgegeben.</p></div>
+     <div class="card a"><h4>Gestapelte Schichten</h4><p>Viele Attention-Schichten → <b>immer abstraktere</b> Zusammenhänge.</p></div>
+   </div>`,
+  source:"<b>Quelle:</b> Vaswani u.a., „Attention Is All You Need“, NeurIPS 2017 (Self-Attention, Multi-Head Attention, Positional Encoding)."},
+
+ {chapter:"modern",kind:"content",eyebrow:"Der eigentliche Türöffner",
+  title:'Wie <em>Selbst-Labelling</em> Sprachmodelle möglich machte',
+  say:"Jetzt der vielleicht wichtigste Trick — der Grund, warum es große Sprachmodelle erst seit Kurzem gibt. Beim überwachten Lernen braucht man für jedes Beispiel eine von Menschen erstellte Lösung, ein Label. Das ist teuer und langsam; niemand kann das halbe Internet von Hand beschriften. Selbstüberwachtes Lernen, auch Selbst-Labelling genannt, löst das: Der Text liefert sich die Aufgaben selbst. Man verdeckt einfach das nächste Wort und lässt das Modell es vorhersagen — die richtige Antwort steht ja schon im Text. Plötzlich wird jede Webseite, jedes Buch zu kostenlosem Trainingsmaterial, ganz ohne menschliche Beschriftung. Genau das machte das Training auf Billionen Wörtern und damit die heutigen Sprachmodelle erst möglich.",
+  viz:`<div class="flow">
+     <div class="node">„… Hauptstadt von<br>Österreich ist ___“<span class="t" style="margin-top:6px">Wort verdeckt</span></div>
+     <span class="arrow">→</span>
+     <div class="node" style="border-color:var(--mint)"><span class="t">Modell sagt voraus</span>„Wien“</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">Lösung stand im Text</span>automatisch<br>geprüft ✓</div>
+   </div>
+   <div class="row">
+     <div class="card r"><h4>Klassisch: Menschen labeln</h4><p><b>Teuer, langsam, begrenzt</b> — nicht auf das ganze Internet skalierbar.</p></div>
+     <div class="card b"><h4>Selbst-Labelling</h4><p><b>Gratis & praktisch unbegrenzt</b> — das ganze Internet wird zum Trainingsmaterial.</p></div>
+   </div>`,
+  source:"<b>Quelle:</b> Selbstüberwachtes Vortraining — Radford u.a., „Improving Language Understanding by Generative Pre-Training“ (GPT), OpenAI 2018; Devlin u.a., „BERT“, NAACL 2019."},
+
+ {chapter:"modern",kind:"content",eyebrow:"Wie ich funktioniere",
+  title:'Ein Sprachmodell sagt das <em>nächste Wort</em> voraus',
+  say:"Jetzt passt alles zusammen. Mein Kern ist verblüffend einfach: Ich sage das wahrscheinlichste nächste Wort voraus. Die Hauptstadt von Österreich ist … Wien. Wiederholt man das Wort für Wort, entstehen ganze Texte. Trainiert werde ich in Stufen: Zuerst lese ich per Selbst-Labelling gewaltige Textmengen, dann übe ich, Anweisungen zu folgen, und schließlich bekomme ich von Menschen Rückmeldung, welche Antworten gut sind — das nennt man bestärkendes Lernen aus menschlichem Feedback. Das macht mich hilfreich, aber nicht allwissend.",
+  viz:`<div class="predict">
+     <span>„Die Hauptstadt von Österreich ist</span>
+     <span class="blank">?</span><span class="becomes arrow">→</span><span class="answer">Wien“</span>
+   </div>
+   <div class="flow" style="margin-top:6px">
+     <div class="node"><span class="t">Stufe 1</span>riesige Texte lesen<br>(Selbst-Labelling)</div><span class="arrow">→</span>
+     <div class="node"><span class="t">Stufe 2</span>Anweisungen<br>üben</div><span class="arrow">→</span>
+     <div class="node"><span class="t">Stufe 3</span>menschliches<br>Feedback (RLHF)</div>
+   </div>`,
+  source:"<b>Quellen:</b> GPT-3 (175 Mrd. Parameter) — Brown u.a., NeurIPS 2020; Feedback-Training (RLHF) — Ouyang u.a., NeurIPS 2022; ChatGPT-Veröffentlichung: OpenAI, 30.11.2022."},
+
+ /* ---------- ANWENDUNGSFELDER ---------- */
+ {chapter:"anwend",kind:"section",secnum:"Kapitel 6",
+  title:'<em>Anwendungsfelder</em>',secsub:"Wofür KI heute eingesetzt wird: Bilder sehen, Sprache verstehen, Neues erschaffen.",
+  say:"Schauen wir, wofür KI heute konkret eingesetzt wird. Zwei große Felder solltest du kennen — Computer Vision und Sprachverarbeitung — und einen entscheidenden Unterschied: erkennen gegenüber erschaffen."},
+
+ {chapter:"anwend",kind:"content",eyebrow:"KI sieht & KI versteht Sprache",
+  title:'Zwei große Felder: <em>Computer Vision & NLP</em>',
+  say:"Zwei Anwendungsfelder begegnen dir überall. Das erste ist Computer Vision, das maschinelle Sehen: KI, die Bilder und Videos versteht — Gesichtserkennung, Tumorerkennung im Röntgenbild, das Auge selbstfahrender Autos. Das technische Arbeitspferd dahinter ist meist ein CNN, ein Convolutional Neural Network, ein Netz, das speziell dafür gebaut ist, in Bildern erst Kanten, dann Formen, dann Objekte zu erkennen. Das zweite Feld ist NLP, die Verarbeitung natürlicher Sprache: KI, die mit Text und gesprochener Sprache umgeht — Übersetzung, Spamfilter, Chatbots wie ich. Hier ist heute der Transformer das Arbeitspferd.",
+  viz:`<div class="row">
+     <div class="card b"><h4>Computer Vision · Sehen</h4><p>KI versteht <b>Bilder & Videos</b>.</p><div class="exbox" style="margin-top:11px;padding:11px 13px"><span class="lead">Technik: CNN</span>Ein Bild-Netz, das Kanten → Formen → Objekte erkennt.</div></div>
+     <div class="card a"><h4>NLP · Sprache</h4><p>KI versteht <b>Text & Sprache</b>.</p><div class="exbox amber" style="margin-top:11px;padding:11px 13px"><span class="lead">Technik: Transformer</span>Das Netz hinter Übersetzung, Chatbots, Suche.</div></div>
+   </div>
+   <div class="tags"><span class="tag">CV: 🚗 Autonomes Fahren</span><span class="tag">CV: 🏥 Medizinbilder</span><span class="tag">NLP: 🌍 Übersetzung</span><span class="tag">NLP: 💬 Chatbots</span></div>`,
+  source:"<b>Quellen:</b> CNN — LeCun u.a., „Gradient-Based Learning Applied to Document Recognition“, Proceedings of the IEEE (1998); Übersicht: Goodfellow, Bengio & Courville, „Deep Learning“ (MIT Press, 2016)."},
+
+ {chapter:"anwend",kind:"content",eyebrow:"Der entscheidende Unterschied",
+  title:'Erkennen <em>versus</em> Erschaffen',
+  say:"Daraus ergibt sich die große Veränderung der letzten Jahre. Frühe KI hat vor allem erkannt und sortiert — man nennt das diskriminativ: Ist das eine Katze? Ist das Spam? Generative KI dagegen erschafft Neues: Mal mir eine Katze, schreib mir einen Brief. Dasselbe Grundprinzip, aber einmal als Prüfer, einmal als Schöpfer. Übrigens sind generative Modelle nicht neu; erst die Kombination aus Transformer und gewaltigen Datenmengen machte sie alltagstauglich.",
+  viz:`<div class="row">
+     <div class="card b"><h4>Diskriminativ · erkennen</h4><p>Bekommt etwas und <b>bewertet</b> es.</p><div class="tags" style="justify-content:flex-start;margin-top:10px"><span class="tag" style="font-size:clamp(10px,1vw,13px)">Ist das Spam?</span><span class="tag" style="font-size:clamp(10px,1vw,13px)">Tumor im Bild?</span></div></div>
+     <div class="vs">→</div>
+     <div class="card a"><h4>Generativ · erschaffen</h4><p>Erzeugt etwas <b>Neues</b>.</p><div class="tags" style="justify-content:flex-start;margin-top:10px"><span class="tag" style="font-size:clamp(10px,1vw,13px)">Text & Code</span><span class="tag" style="font-size:clamp(10px,1vw,13px)">Bild & Musik</span></div></div>
+   </div>
+   <div class="exbox"><span class="lead">Merksatz</span>
+     Dasselbe Grundprinzip — einmal als <b>Prüfer</b> (erkennen), einmal als <b style="color:var(--amber)">Schöpfer</b> (erschaffen).</div>`,
+  source:"<b>Hinweis:</b> Generative Modelle sind älter als der heutige Boom — GAN: Goodfellow u.a., NeurIPS 2014; VAE: Kingma & Welling, arXiv 2013 / ICLR 2014. Erst Transformer + Daten machten sie massentauglich."},
+
+ /* ---------- AGENTEN ---------- */
+ {chapter:"agent",kind:"section",secnum:"Kapitel 7",
+  title:'KI-<em>Agenten</em>',secsub:"Die nächste Stufe: KI, die nicht nur antwortet, sondern selbst handelt.",
+  say:"Kommen wir zum aktuellsten Trend: den KI-Agenten. Bisher hat ein Sprachmodell vor allem geantwortet. Ein Agent geht weiter — er handelt. Schauen wir genau an, was das heißt."},
+
+ {chapter:"agent",kind:"content",eyebrow:"Von Antworten zu Handeln",
+  title:'Was ist ein <em>KI-Agent</em> genau?',
+  say:"Definieren wir es sauber. Ein KI-Agent ist ein System, dessen Kern — sein Gehirn — ein Sprachmodell ist, das aber selbständig ein Ziel verfolgt, statt nur einmal zu antworten. Dazu hat es drei Dinge: erstens das Sprachmodell als Gehirn zum Planen und Entscheiden; zweitens Werkzeuge als Hände, etwa eine Websuche, einen Taschenrechner oder andere Programme, mit denen es tatsächlich etwas tun kann; und drittens ein Gedächtnis als Notizblock, um Zwischenergebnisse über mehrere Schritte zu behalten. Der entscheidende Unterschied zum Chatbot: Ein Chatbot hört nach der Antwort auf. Ein Agent zerlegt ein Ziel in Schritte, führt sie aus, prüft die Ergebnisse und arbeitet weiter, bis das Ziel erreicht ist — mit möglichst wenig menschlichem Eingreifen.",
+  viz:`<div class="flow">
+     <div class="node"><span class="t">das Gehirn</span>Sprachmodell<br>(plant, entscheidet)</div>
+     <span class="arrow">+</span>
+     <div class="node"><span class="t">die Hände</span>Werkzeuge<br>(Suche, Programme)</div>
+     <span class="arrow">+</span>
+     <div class="node"><span class="t">der Notizblock</span>Gedächtnis</div>
+     <span class="arrow">=</span>
+     <div class="node" style="border-color:var(--mint)"><span class="t">Ergebnis</span>KI-Agent</div>
+   </div>
+   <div class="row">
+     <div class="card b"><h4>Chatbot</h4><p>Versteht eine Frage, gibt <b>eine Antwort</b> — und hört dann auf.</p></div>
+     <div class="vs">→</div>
+     <div class="card a"><h4>KI-Agent</h4><p>Verfolgt ein <b>Ziel</b>: plant Schritte, nutzt Werkzeuge, prüft, macht weiter.</p></div>
+   </div>`,
+  source:"<b>Quellen:</b> IBM, „What are AI agents?“ (Think, 2024/2025): ein KI-Agent erledigt Aufgaben autonom, plant seinen Ablauf selbst und nutzt Werkzeuge; Anthropic, „Building Effective Agents“ (Schluntz & Zhang, 2024)."},
+
+ {chapter:"agent",kind:"content",eyebrow:"Die Arbeitsweise",
+  title:'Wie ein KI-Agent <em>arbeitet</em>',
+  say:"Wie arbeitet ein Agent konkret? In einer Schleife. Er überlegt, welcher Schritt als Nächstes sinnvoll ist. Er handelt, nutzt also ein Werkzeug — zum Beispiel eine Suche. Er beobachtet das Ergebnis. Und auf dieser Grundlage plant er den nächsten Schritt. Dieses Abwechseln von Überlegen und Handeln nennt man das ReAct-Prinzip. So lassen sich mehrstufige Aufgaben lösen: eine Reise planen, im Web recherchieren, Code schreiben und ausführen. Eine wichtige Faustregel zum Schluss: Je mehr ein Agent selbständig tut, desto mehr menschliche Aufsicht braucht er — denn Fehler pflanzen sich über die Schritte fort.",
+  viz:`<div class="flow">
+     <div class="node"><span class="t">Ziel</span>„Plane meine<br>Reise“</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">1 · Überlegen</span>nächster<br>Schritt?</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">2 · Handeln</span>Werkzeug<br>nutzen</div>
+     <span class="arrow">→</span>
+     <div class="node"><span class="t">3 · Beobachten</span>Ergebnis<br>prüfen</div>
+     <span class="arrow">↺</span>
+     <div class="node" style="border-color:var(--mint)"><span class="t">am Ende</span>Ziel<br>erreicht</div>
+   </div>
+   <div class="exbox amber"><span class="lead">Faustregel</span>
+     Je <b>autonomer</b> ein Agent handelt, desto wichtiger wird <b>menschliche Kontrolle</b> — Fehler in frühen Schritten verstärken sich.</div>`,
+  source:"<b>Quelle:</b> ReAct-Prinzip (Überlegen + Handeln im Wechsel) — Yao u.a., „ReAct“, ICLR 2023 (arXiv:2210.03629); gilt als Grundstein agentischer KI."},
+
+ /* ---------- GRENZEN ---------- */
+ {chapter:"grenzen",kind:"section",secnum:"Kapitel 8",
+  title:'Grenzen & <em>Verantwortung</em>',secsub:"Wo KI scheitert — und wie man sie verantwortungsvoll nutzt.",
+  say:"So beeindruckend das alles ist — ich bin nicht unfehlbar. In diesem Kapitel zeige ich dir ehrlich meine Grenzen und wie man sie verantwortungsvoll nutzt."},
+
+ {chapter:"grenzen",kind:"content",eyebrow:"Ehrlich gesagt",
+  title:'Ich bin <em>nicht</em> unfehlbar',
+  say:"Das solltest du unbedingt wissen. Ich kann halluzinieren — überzeugend klingende, aber falsche Antworten geben. Ich kann Vorurteile aus meinen Trainingsdaten übernehmen; das berühmteste Beispiel ist Amazon: Ein KI-Recruiting-Werkzeug benachteiligte systematisch Frauen, weil es auf zehn Jahren überwiegend männlicher Bewerbungen trainiert worden war — es wertete sogar Lebensläufe ab, in denen das Wort women's vorkam. Amazon stellte das Projekt ein. Außerdem bin ich oft eine Black Box: Selbst Fachleute können nicht immer erklären, warum ich etwas sage. Und je selbständiger eine KI handelt, desto wichtiger wird Kontrolle.",
+  viz:`<div class="learnlist">
+     <div class="learn"><div class="h"><span class="ic">💬</span>Halluzinationen</div><p>Kein eingebautes Wahrheits-Prüfsystem — ich erzeuge, was <b>plausibel klingt</b>, nicht zwingend, was stimmt.</p></div>
+     <div class="learn"><div class="h"><span class="ic">⚖️</span>Verzerrungen (Bias)</div><p><b>Amazon-Recruiting (2018):</b> KI benachteiligte Frauen, weil die Trainingsdaten überwiegend männlich waren. Projekt eingestellt.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🔒</span>Black Box</div><p>Selbst Fachleute können <b>nicht immer erklären</b>, wie ich zu einer Antwort komme.</p></div>
+     <div class="learn"><div class="h"><span class="ic">✅</span>Gegenmittel</div><p>Quellen prüfen, Werkzeuge nutzen, bei Agenten den <b>Menschen im Spiel</b> behalten.</p></div>
+   </div>`,
+  source:"<b>Quelle (Bias):</b> J. Dastin, „Amazon scraps secret AI recruiting tool that showed bias against women“, Reuters, Okt. 2018 (Tool ab 2014 entwickelt, 2017 eingestellt)."},
+
+ {chapter:"grenzen",kind:"content",eyebrow:"Genauer betrachtet",
+  title:'Warum ich <em>halluziniere</em> — und wann',
+  say:"Schauen wir die Halluzinationen genauer an. Der Grund steckt in meiner Funktionsweise: Ich sage das wahrscheinlichste nächste Wort voraus, modelliere also, was plausibel klingt, nicht was wahr ist. Ein eingebautes Wahrheits-Prüfsystem habe ich nicht. Wo mein Wissen eine Lücke hat, fülle ich sie mit etwas Passendem. Aktuelle Forschung von OpenAI zeigt zusätzlich: Training und Bewertung belohnen das Raten gegenüber einem ehrlichen Ich-weiß-es-nicht — wie ein Prüfling, der lieber rät als die Antwort leer lässt. Besonders hoch ist die Gefahr bei seltenem Wissen, bei sehr aktuellen Themen jenseits meines Trainingsstands und bei präzisen Details wie Zahlen, Daten oder Quellenangaben.",
+  viz:`<div class="row">
+     <div class="card b"><h4>plausibel statt wahr</h4><p>Ich sage das wahrscheinlichste nächste Wort voraus — das modelliert <b>Plausibilität, nicht Wahrheit</b>.</p></div>
+     <div class="card b"><h4>kein Wahrheits-Check</h4><p>Bei Wissenslücken <b>fülle ich auf</b>, statt zu schweigen.</p></div>
+     <div class="card a"><h4>Raten wird belohnt</h4><p>Training & Tests bevorzugen eine Antwort gegenüber „weiß nicht“ — also <b>rate ich</b>.</p></div>
+   </div>
+   <div class="exbox"><span class="lead">Hohe Gefahr bei …</span>
+     seltenem Wissen · aktuellen Ereignissen · genauen <b>Zahlen & Quellen</b> · suggestiven Fragen mit falscher Annahme. <b>Daher: Wichtiges immer prüfen.</b></div>`,
+  source:"<b>Quellen:</b> Kalai, Nachum, Vempala & Zhang, „Why Language Models Hallucinate“, OpenAI, arXiv:2509.04664 (2025) — Halluzinationen folgen wesentlich aus Trainings- & Bewertungsanreizen; Überblick: Ji u.a., „Survey of Hallucination in Natural Language Generation“, ACM Computing Surveys 55(12), 2023 (DOI 10.1145/3571730)."},
+
+ {chapter:"grenzen",kind:"content",eyebrow:"Im Überblick",
+  title:'Die <em>Grenzen</em> von KI — auf einen Blick',
+  say:"Fassen wir die Grenzen systematisch zusammen, denn sie reichen über Halluzinationen hinaus. Erstens die Black Box: Moderne KI ist oft schwer durchschaubar, ihre Entscheidungswege sind nicht leicht nachvollziehbar — daran arbeitet das Forschungsfeld der erklärbaren KI. Zweitens Verzerrungen, die zu Diskriminierung führen können. Drittens Halluzinationen, also sachlich falsche Inhalte. Viertens die Datenabhängigkeit: Eine KI ist immer nur so gut wie ihre Trainingsdaten — schlechte oder einseitige Daten, schlechtes Modell. Und fünftens, ein oft übersehener Punkt: KI denkt in Wahrscheinlichkeiten. Sie sagt nicht Das ist sicher so, sondern eher Das ist zu 80 Prozent ein Hund. Daraus folgt zweierlei: Die Antwort ist nie hundertprozentig sicher, und auf dieselbe Frage kann ein generatives Modell unterschiedliche Antworten geben. Man muss Ergebnisse also als Einschätzung lesen, nicht als feststehende Wahrheit.",
+  viz:`<div class="learnlist">
+     <div class="learn"><div class="h"><span class="ic">🔍</span>Black Box</div><p>Entscheidungswege schwer nachvollziehbar. Forschungsfeld: <b>erklärbare KI (XAI)</b>.</p></div>
+     <div class="learn"><div class="h"><span class="ic">⚖️</span>Verzerrung & Bias</div><p>Kann <b>unfaire</b> Entscheidungen gegenüber Personen oder Gruppen erzeugen.</p></div>
+     <div class="learn"><div class="h"><span class="ic">💬</span>Halluzinationen</div><p>Sachlich <b>falsche</b> Inhalte, überzeugend formuliert.</p></div>
+     <div class="learn"><div class="h"><span class="ic">📊</span>Datenabhängigkeit</div><p>So gut wie die Daten: <b>einseitige Daten → einseitiges Modell</b>.</p></div>
+   </div>
+   <div class="exbox"><span class="lead">Schlüsselpunkt: KI denkt in Wahrscheinlichkeiten</span>
+     KI sagt nicht „sicher ein Hund“, sondern <b>„zu 80 % ein Hund“</b>. Folge: nie 100 % sicher — und ein generatives Modell kann auf <b>dieselbe Frage verschiedene Antworten</b> geben. Ergebnisse sind eine <b>Einschätzung</b>, keine feststehende Wahrheit.</div>`,
+  source:"<b>Quellen:</b> Erklärbare KI — Chamola u.a., Cognitive Computation (2024); Bias — Mehrabi u.a., arXiv:1908.09635 (2019); Halluzination — Ji u.a., ACM Computing Surveys (2023); Datenqualität — Gebru u.a., „Datasheets for Datasets“ (2018); probabilistische Ausgaben in LLMs — Nafar u.a. (2024)."},
+
+ {chapter:"grenzen",kind:"content",eyebrow:"Gut fragen, gut antworten",
+  title:'Die Kunst des <em>guten Prompts</em>',
+  say:"Wie gut meine Antwort ausfällt, hängt stark davon ab, wie du fragst. Das nennt man Prompt Engineering. Vier einfache Hebel helfen fast immer. Erstens: Rolle und Kontext geben — sag mir, wer ich sein soll und für wen die Antwort gedacht ist. Zweitens: konkret sein — je klarer Aufgabe, Format und Umfang, desto besser. Drittens: Beispiele mitgeben — zeig mir an ein, zwei Beispielen, was du willst; das nennt man Few-Shot. Und viertens: bei kniffligen Aufgaben um schrittweises Denken bitten, Chain-of-Thought genannt — das verbessert die Genauigkeit deutlich. Ein guter Prompt senkt nebenbei das Halluzinationsrisiko, weil er mir weniger Raum zum Raten lässt.",
+  viz:`<div class="learnlist">
+     <div class="learn"><div class="h"><span class="ic">🎭</span>Rolle & Kontext</div><p>„Du bist Steuerberater, erkläre für Laien …“ — gib mir Rolle und Zielpublikum.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🎯</span>Konkret & präzise</div><p>Aufgabe, Format und Länge nennen: „in 100 Wörtern, mit 3 Beispielen“.</p></div>
+     <div class="learn"><div class="h"><span class="ic">📋</span>Beispiele (Few-Shot)</div><p>Ein, zwei Musterbeispiele zeigen mir das Gewünschte besser als jede Beschreibung.</p></div>
+     <div class="learn"><div class="h"><span class="ic">🪜</span>Schritt für Schritt</div><p>„Überlege Schritt für Schritt“ (Chain-of-Thought) — bei Logik & Rechnen deutlich genauer.</p></div>
+   </div>`,
+  source:"<b>Quellen:</b> Few-Shot — Brown u.a., „Language Models are Few-Shot Learners“, NeurIPS 2020; Chain-of-Thought — Wei u.a., NeurIPS 2022."},
+
+ /* ---------- REGELN ---------- */
+ {chapter:"regeln",kind:"content",eyebrow:"Die Spielregeln",
+  title:'Europa reguliert KI nach <em>Risiko</em>',
+  say:"Weil KI mächtig und zugleich fehlbar ist, staffelt die Europäische Union die Regeln nach Risiko. Je größer die Gefahr für Menschen, desto strenger die Auflagen — von einer schlichten Kennzeichnungspflicht bis zum kompletten Verbot. Ein Chatbot muss sich nur als KI zu erkennen geben. Eine KI in der Bewerberauswahl gilt als Hochrisiko und unterliegt strengen Pflichten — erinnere dich an das Amazon-Beispiel. Und manches, etwa staatliches Social Scoring, ist ganz verboten.",
+  viz:`<div class="pyr">
+     <div class="tier t1"><span class="lab">Verboten</span>z. B. staatliches „Social Scoring“</div>
+     <div class="tier t2"><span class="lab">Hohes Risiko</span>z. B. KI in Bewerberauswahl, Kreditvergabe — strenge Auflagen</div>
+     <div class="tier t3"><span class="lab">Begrenztes Risiko</span>z. B. Chatbots — müssen sich als KI zu erkennen geben</div>
+     <div class="tier t4"><span class="lab">Minimales Risiko</span>z. B. Spamfilter — keine besonderen Pflichten</div>
+   </div>`,
+  source:"<b>Quelle:</b> EU-KI-Verordnung (EU) 2024/1689, in Kraft seit 1. August 2024 (gestaffelte Anwendung bis 2027)."},
+
+ /* ---------- ENDE ---------- */
+ {chapter:"ende",kind:"content",eyebrow:"Zusammengeführt",
+  title:'Die große <em>Landkarte</em> — noch einmal',
+  say:"Fassen wir zusammen, was du jetzt weißt. KI ist der Überbegriff. Darunter die symbolische KI mit Regeln von Hand und das maschinelle Lernen, das aus Daten lernt. Im maschinellen Lernen liegen das klassische ML und die neuronalen Netze, also Deep Learning. Quer dazu stehen die vier Lernarten. Der Transformer ist die Bauweise hinter den Sprachmodellen, Selbst-Labelling lieferte die Daten, GPUs die Rechenkraft. Ein Modell wie ich ist ein neuronales Netz, trainiert mit Selbst-Labelling und menschlichem Feedback — und als Agent kann ich sogar selbst handeln. Das ist das ganze Bild.",
+  viz:`<div class="learnlist">
+     <div class="learn"><div class="h"><span class="ic" style="background:rgba(255,178,77,.14)">①</span>Symbolische KI</div><p>Regeln von Hand. Transparent, aber starr. Heute Nische.</p></div>
+     <div class="learn"><div class="h"><span class="ic" style="background:rgba(94,234,212,.14)">②</span>Maschinelles Lernen</div><p>Lernt aus Daten. Enthält klassisches ML und neuronale Netze.</p></div>
+     <div class="learn"><div class="h"><span class="ic" style="background:rgba(94,234,212,.14)">③</span>Lernarten</div><p>Überwacht, unüberwacht, bestärkend, selbstüberwacht.</p></div>
+     <div class="learn"><div class="h"><span class="ic" style="background:rgba(255,178,77,.14)">④</span>Neuronale Netze</div><p>Der Motor — Transformer, Sprachmodelle, KI-Agenten.</p></div>
+   </div>`,
+  source:"<b>Merksatz:</b> KI ⊃ Maschinelles Lernen ⊃ neuronale Netze (Deep Learning). Symbolische KI ist der zweite, ältere Zweig unter dem Dach „KI“."},
+
+ {chapter:"ende",kind:"cover",kicker:"Das war's",
+  title:'KI ist kein Zauber — <em>jetzt weißt du, warum</em>',
+  sub:"Im Kern ist sie Mustererkennung im großen Stil, plus sehr viel Rechenleistung. Wer das verstanden hat, durchschaut die meisten Schlagzeilen.",
+  say:"Geschafft! Du kennst jetzt die Grundlagen, die Landkarte, die zwei Methoden, die Lernarten, neuronale Netze, den Transformer, KI-Agenten und meine Grenzen. Damit verstehst du mehr als die meisten Schlagzeilen. Danke fürs Zuhören! Auf der letzten Folie findest du alle Quellen zum Nachlesen."},
+
+ {chapter:"ende",kind:"sources",title:"Quellen & zum Nachlesen",
+  say:"Alle Aussagen dieser Präsentation stützen sich auf diese Quellen — von den Klassikern bis zu aktueller Forschung aus 2024 und 2025. Wenn du tiefer einsteigen willst, sind das die richtigen Anlaufpunkte. Bis bald!",
+  items:[
+   ["EU-KI-Verordnung","(EU) 2024/1689, Art. 3 Abs. 1 („KI-System“); Leitlinien der EU-Kommission, Feb. 2025 (Amtsblatt der EU)."],
+   ["IBM (2024/2025)","„What are AI agents?“ & „What is AI / machine learning“, IBM Think — aktuelle Einordnung."],
+   ["Anthropic (2024)","„Building Effective Agents“, E. Schluntz & B. Zhang — KI-Agenten."],
+   ["Yao u.a. (2023)","„ReAct: Synergizing Reasoning and Acting in Language Models“, ICLR (arXiv:2210.03629)."],
+   ["Kalai u.a. (2025)","„Why Language Models Hallucinate“, OpenAI (arXiv:2509.04664)."],
+   ["Vaswani u.a. (2017)","„Attention Is All You Need“, NeurIPS — der Transformer."],
+   ["LeCun, Bengio & Hinton (2015)","„Deep Learning“, Nature 521 — Überblicksartikel."],
+   ["Krizhevsky, Sutskever & Hinton (2012)","„ImageNet Classification with Deep CNNs“, NeurIPS — AlexNet."],
+   ["LeCun u.a. (1998)","„Gradient-Based Learning Applied to Document Recognition“, Proceedings of the IEEE — CNN."],
+   ["Rumelhart, Hinton & Williams (1986)","„Learning representations by back-propagating errors“, Nature 323."],
+   ["Hochreiter & Schmidhuber (1997)","„Long Short-Term Memory“, Neural Computation — frühe Sequenzmodelle."],
+   ["Brown u.a. (2020)","„Language Models are Few-Shot Learners“, NeurIPS — GPT-3, Few-Shot."],
+   ["Wei u.a. (2022)","„Chain-of-Thought Prompting…“, NeurIPS — schrittweises Denken."],
+   ["Radford u.a. (2018) · Devlin u.a. (2019)","Selbstüberwachtes Vortraining: GPT bzw. BERT (NAACL)."],
+   ["Ouyang u.a. (2022)","„Training language models to follow instructions…“, NeurIPS — RLHF."],
+   ["Silver u.a. (2016)","„Mastering the game of Go…“, Nature 529 — AlphaGo."],
+   ["Breiman (2001) · Chen & Guestrin (2016)","Random Forests (Machine Learning) · XGBoost (ACM SIGKDD)."],
+   ["Goodfellow u.a. (2014) · Kingma & Welling (2013/14)","Generative Modelle: GAN (NeurIPS) · VAE (ICLR)."],
+   ["Goodfellow, Bengio & Courville (2016)","„Deep Learning“, MIT Press — Standardwerk."],
+   ["McCulloch & Pitts (1943) · Rosenblatt (1958)","Frühe Neuronen-Modelle (Bull. Math. Biophysics; Psychological Review)."],
+   ["Buchanan & Shortliffe (1984)","„Rule-Based Expert Systems“ (Addison-Wesley) — MYCIN."],
+   ["Amazon-Bias: Dastin (2018)","Reuters — KI-Recruiting benachteiligte Frauen."],
+   ["Ji u.a. (2023)","„Survey of Hallucination in Natural Language Generation“, ACM Computing Surveys 55(12)."],
+   ["Mehrabi u.a. (2019)","„A Survey on Bias and Fairness in Machine Learning“, arXiv:1908.09635."],
+   ["Chamola u.a. (2024)","„Interpretability of Black-Box Models (XAI)“, Cognitive Computation."],
+   ["Gebru u.a. (2018)","„Datasheets for Datasets“ — Datenqualität & -dokumentation."],
+   ["Nafar u.a. (2024)","„Probabilistic Reasoning in Generative LLMs“ — Unsicherheit."],
+   ["Sutton & Barto (2018)","„Reinforcement Learning: An Introduction“ (MIT Press) — bestärkendes Lernen."],
+   ["Russell & Norvig","„Artificial Intelligence: A Modern Approach“ (Pearson) — Standardlehrbuch."]
+  ]}
+];
+
+/* ============================================================ ENGINE ============================================================ */
+const main=document.getElementById('main');
+const progressEl=document.getElementById('progress');
+const counterEl=document.getElementById('counter');
+const chapterlabelEl=document.getElementById('chapterlabel');
+const prevBtn=document.getElementById('prevBtn');
+const nextBtn=document.getElementById('nextBtn');
+const audioBtn=document.getElementById('audioBtn');
+const replayBtn=document.getElementById('replayBtn');
+const mapBtn=document.getElementById('mapBtn');
+const overlay=document.getElementById('overlay');
+const ovchapters=document.getElementById('ovchapters');
+let idx=0, typing=false, typeTimer=null, audioOn=false;
+
+/* ---- progress ticks grouped by chapter ---- */
+(function buildProgress(){
+  let curChap=null, seg=null;
+  SLIDES.forEach((s,i)=>{
+    if(s.chapter!==curChap){ curChap=s.chapter; seg=document.createElement('div'); seg.className='seg'; progressEl.appendChild(seg); }
+    const d=document.createElement('div'); d.className='tick'; d.innerHTML='<i></i>'; d.dataset.i=i;
+    d.onclick=()=>{ clearAgent(); stopSpeak(); idx=i; render(); };
+    seg.appendChild(d);
+  });
+})();
+const ticks=[...progressEl.querySelectorAll('.tick')];
+
+/* ---- chapter overview overlay ---- */
+(function buildOverlay(){
+  CHAPTERS.forEach(c=>{
+    const firstIdx=SLIDES.findIndex(s=>s.chapter===c.id);
+    if(firstIdx<0) return;
+    const el=document.createElement('div'); el.className='ovchap'; el.dataset.id=c.id;
+    el.innerHTML=`<div class="cn">${c.name}</div><div class="ct">${c.sub||c.name}</div>`;
+    el.onclick=()=>{ clearAgent(); stopSpeak(); idx=firstIdx; toggleOverlay(false); render(); };
+    ovchapters.appendChild(el);
+  });
+})();
+function toggleOverlay(force){
+  const show = force!==undefined ? force : !overlay.classList.contains('show');
+  overlay.classList.toggle('show',show);
+  if(show){ const cur=SLIDES[idx].chapter; [...ovchapters.children].forEach(el=>el.classList.toggle('cur',el.dataset.id===cur)); }
+}
+mapBtn.onclick=()=>toggleOverlay();
+
+/* ---- speech ---- */
+const synth=window.speechSynthesis;
+let voice=null;
+function pickVoice(){ if(!synth)return; const vs=synth.getVoices(); voice=vs.find(v=>/de[-_]DE/i.test(v.lang))||vs.find(v=>/^de/i.test(v.lang))||null; }
+if(synth){ pickVoice(); synth.onvoiceschanged=pickVoice; }
+function ttsClean(html){
+  let t=html.replace(/<[^>]+>/g,'');
+  t=t.replace(/→/g,' ergibt ').replace(/↺/g,' wiederholen ').replace(/—/g,', ').replace(/…/g,' ').replace(/⊃/g,' enthält ');
+  t=t.replace(/z\.\s?B\./g,'zum Beispiel').replace(/u\.\s?a\./g,'unter anderem').replace(/d\.\s?h\./g,'das heißt');
+  t=t.replace(/Mrd\./g,'Milliarden').replace(/Abs\./g,'Absatz').replace(/Art\./g,'Artikel');
+  t=t.replace(/x₁/g,'x eins').replace(/x₂/g,'x zwei').replace(/x₃/g,'x drei').replace(/w₁/g,'w eins').replace(/w₂/g,'w zwei').replace(/w₃/g,'w drei');
+  t=t.replace(/[„“”]/g,'');
+  t=t.replace(/\s+/g,' ').trim();
+  return t;
+}
+let resumeTimer=null;
+function stopSpeak(){ if(!synth)return; synth.cancel(); if(resumeTimer){clearInterval(resumeTimer);resumeTimer=null;} setTalking(false); }
+function speak(text){
+  if(!synth||!audioOn)return;
+  stopSpeak();
+  const clean=ttsClean(text);
+  const parts=clean.match(/[^.!?]+[.!?]*/g)||[clean];
+  let i=0; setTalking(true);
+  resumeTimer=setInterval(()=>{ if(synth.speaking) synth.resume(); },9000);
+  (function nextPart(){
+    if(i>=parts.length){ setTalking(false); if(resumeTimer){clearInterval(resumeTimer);resumeTimer=null;} agentSpeakingDone(); return; }
+    const u=new SpeechSynthesisUtterance(parts[i].trim());
+    u.lang='de-DE'; if(voice)u.voice=voice; u.rate=1.0; u.pitch=1.06;
+    u.onend=()=>{i++;nextPart();}; u.onerror=()=>{i++;nextPart();};
+    synth.speak(u);
+  })();
+}
+function setTalking(on){ const bot=document.getElementById('bot'); if(bot)bot.classList.toggle('talking',on); const sp=document.querySelector('.speech'); if(sp)sp.classList.toggle('spk-on',on); }
+
+/* ---- agent status orchestration ---- */
+let agentTimers=[];
+function clearAgent(){ agentTimers.forEach(t=>clearTimeout(t)); agentTimers=[]; }
+function setStatus(text,busy){ const row=document.getElementById('statusrow'); const t=document.getElementById('statustext'); if(!row||!t)return; t.textContent=text; row.classList.toggle('idle',!busy); }
+function setTool(name,state){ document.querySelectorAll('#toolchips .toolchip').forEach(c=>{ if(name==='reset'){c.classList.remove('active','done');return;} if(c.dataset.tool===name){c.classList.remove('active','done');if(state)c.classList.add(state);} }); }
+function animateViz(){
+  const viz=document.querySelector('.viz'); if(!viz)return;
+  const group=viz.querySelector('.row,.flow,.learnlist,.pyr,.tags,.map,.traintable,.axes')||viz;
+  const kids=[...group.children];
+  kids.forEach((k,n)=>{ k.style.opacity='0'; k.style.transform='translateY(10px)'; k.style.transition='opacity .5s, transform .5s'; setTimeout(()=>{k.style.opacity='';k.style.transform='';}, 60+n*90); });
+}
+function runAgentSequence(isContent, done){
+  clearAgent();
+  if(!isContent){ done(); return; }
+  setTool('reset'); setStatus('analysiert die Frage …',true);
+  agentTimers.push(setTimeout(()=>{ setStatus('ruft Wissensbasis ab …',true); setTool('kb','active'); },600));
+  agentTimers.push(setTimeout(()=>{ setTool('kb','done'); setStatus('erstellt Diagramm …',true); setTool('viz','active'); animateViz(); },1400));
+  agentTimers.push(setTimeout(()=>{ setTool('viz','done'); setStatus(audioOn?'spricht …':'erklärt …',true); if(audioOn)setTool('voice','active'); done(); },2200));
+}
+function agentSpeakingDone(){ setTool('voice','done'); setStatus('fertig · bereit für den nächsten Schritt',false); }
+
+/* ---- ADA bot markup ---- */
+function botHTML(withStatus){
+  return `<div class="bot" id="bot"><div class="halo"></div>
+    <svg class="adasvg" viewBox="0 0 200 212" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><radialGradient id="adaBody" cx="36%" cy="28%" r="78%">
+        <stop offset="0%" stop-color="#2b3441"/><stop offset="55%" stop-color="#161c25"/><stop offset="100%" stop-color="#0c1118"/>
+      </radialGradient></defs>
+      <line class="ant" x1="100" y1="46" x2="100" y2="26"/>
+      <circle class="anttip" cx="100" cy="20" r="6"/>
+      <circle class="body" cx="100" cy="120" r="74"/>
+      <circle class="cheek" cx="66" cy="134" r="12"/><circle class="cheek" cx="134" cy="134" r="12"/>
+      <ellipse class="eye l" cx="77" cy="106" rx="8.5" ry="12.5"/>
+      <ellipse class="eye r" cx="123" cy="106" rx="8.5" ry="12.5"/>
+      <g class="mouth">
+        <rect class="bar b1" x="74" y="134" width="7" height="26" rx="3.5"/>
+        <rect class="bar b2" x="85" y="134" width="7" height="26" rx="3.5"/>
+        <rect class="bar b3" x="96.5" y="134" width="7" height="26" rx="3.5"/>
+        <rect class="bar b4" x="108" y="134" width="7" height="26" rx="3.5"/>
+        <rect class="bar b5" x="119" y="134" width="7" height="26" rx="3.5"/>
+      </g>
+    </svg>
+    ${withStatus?`<div class="agentstatus">
+      <div class="statusrow idle" id="statusrow"><span class="spin"></span><span id="statustext">bereit</span></div>
+      <div class="toolchips" id="toolchips">
+        <span class="toolchip" data-tool="kb">📚 Wissensbasis</span>
+        <span class="toolchip" data-tool="viz">📊 Diagramm</span>
+        <span class="toolchip" data-tool="voice">🔊 Sprache</span>
+      </div></div>`:''}
+    </div>`;
+}
+
+/* ---- render ---- */
+function render(){
+  const s=SLIDES[idx]; let html='';
+  if(s.kind==='cover'){
+    html=`<div class="slide active cover">${botHTML(false)}
+      <div class="kicker">${s.kicker}</div><h1>${s.title}</h1><div class="sub">${s.sub}</div>
+      <div class="speech"><span class="label"><span class="spk"></span>ADA</span><span class="txt" id="txt"></span><span class="cursor" id="cur"></span></div></div>`;
+  } else if(s.kind==='section'){
+    const chap=CHAPTERS.find(c=>c.id===s.chapter);
+    const map=CHAPTERS.filter(c=>!['start','ende'].includes(c.id)).map(c=>`<span class="${c.id===s.chapter?'on':''}">${c.name}</span>`).join('');
+    html=`<div class="slide active section">
+      <div class="secnum">${s.secnum}</div><h1>${s.title}</h1><div class="secsub">${s.secsub}</div>
+      <div class="secmap">${map}</div>
+      <div class="speech" style="max-width:640px"><span class="label"><span class="spk"></span>ADA</span><span class="txt" id="txt"></span><span class="cursor" id="cur"></span></div></div>`;
+  } else if(s.kind==='sources'){
+    html=`<div class="slide active" style="justify-content:center;gap:8px">
+      <div class="eyebrow">Transparenz · Quellen</div>
+      <h2 style="font-family:'Fraunces',serif;font-weight:600;font-size:clamp(26px,3.6vw,48px);margin:4px 0 10px">${s.title}</h2>
+      <div class="speech" style="max-width:900px;margin-bottom:14px"><span class="label"><span class="spk"></span>ADA</span><span class="txt" id="txt"></span><span class="cursor" id="cur"></span></div>
+      <div class="srcwrap"><div class="srcgrid">${s.items.map(it=>`<div class="srcitem"><b>${it[0]}</b> <span>${it[1]}</span></div>`).join('')}</div></div></div>`;
+  } else {
+    const steps = s.dim ? `<div class="dimsteps">${DIMS.map((d,i)=>`<span class="dimstep${i+1===s.dim?' on':''}">${i+1} ${d}</span>`).join('')}</div>` : '';
+    html=`<div class="slide active content">
+      <div class="botcol">${botHTML(true)}<div class="botname">ADA</div>
+        <div class="speech"><span class="label"><span class="spk"></span>ADA erklärt</span><span class="txt" id="txt"></span><span class="cursor" id="cur"></span></div></div>
+      <div class="maincol">
+        <div class="eyebrow">${s.eyebrow}</div><h2>${s.title}</h2>${steps}
+        <div class="viz">${s.viz}</div>
+        ${s.source?`<div class="source">${s.source}</div>`:''}
+      </div></div>`;
+  }
+  main.innerHTML=html;
+
+  // progress + chapter label
+  ticks.forEach((t,i)=>{t.className='tick'+(i<idx?' done':'')+(i===idx?' cur':'');});
+  const chap=CHAPTERS.find(c=>c.id===s.chapter);
+  const chapNum=CHAPTERS.filter(c=>!['start','ende'].includes(c.id)).findIndex(c=>c.id===s.chapter);
+  chapterlabelEl.innerHTML = chap ? (chapNum>=0?`<span class="num">Kapitel ${chapNum+1} ·</span> ${chap.name}`:`${chap.name}`) : '';
+  counterEl.textContent=String(idx+1).padStart(2,'0')+' / '+String(SLIDES.length).padStart(2,'0');
+  prevBtn.style.visibility=idx===0?'hidden':'visible';
+  nextBtn.textContent=idx===SLIDES.length-1?'Neustart ↺':'Weiter →';
+
+  const say=s.say||'';
+  const isContent=(s.kind==='content');
+  const txtEl=document.getElementById('txt'); const curEl=document.getElementById('cur');
+  if(txtEl)txtEl.innerHTML=''; if(curEl)curEl.classList.add('hidden');
+  runAgentSequence(isContent, ()=>{
+    if(audioOn){ if(txtEl)txtEl.innerHTML=say; document.getElementById('cur')?.classList.add('hidden'); speak(say); }
+    else { typeWriter(say); }
+  });
+}
+
+function typeWriter(raw){
+  const txt=document.getElementById('txt'); const cur=document.getElementById('cur'); const bot=document.getElementById('bot');
+  if(!txt)return;
+  clearInterval(typeTimer); typing=true; cur.classList.remove('hidden'); if(bot)bot.classList.add('talking');
+  let i=0; const len=raw.length;
+  typeTimer=setInterval(()=>{
+    if(raw[i]==='<'){const c=raw.indexOf('>',i);i=c+1;} else {i++;}
+    txt.innerHTML=raw.slice(0,i);
+    if(i>=len){clearInterval(typeTimer);txt.innerHTML=raw;typing=false;cur.classList.add('hidden');if(bot)bot.classList.remove('talking');agentSpeakingDone();}
+  },16);
+  txt._finish=()=>{clearInterval(typeTimer);txt.innerHTML=raw;typing=false;cur.classList.add('hidden');if(bot)bot.classList.remove('talking');agentSpeakingDone();};
+}
+function next(){
+  const txt=document.getElementById('txt');
+  if(!audioOn && typing && txt && txt._finish){ txt._finish(); return; }
+  clearAgent(); stopSpeak(); idx=idx>=SLIDES.length-1?0:idx+1; render();
+}
+function prev(){ clearAgent(); stopSpeak(); if(idx>0){idx--;render();} }
+nextBtn.onclick=next; prevBtn.onclick=prev;
+replayBtn.onclick=()=>{ if(!audioOn){audioOn=true;updateAudioBtn();} speak(SLIDES[idx].say||''); };
+audioBtn.onclick=()=>{ audioOn=!audioOn; updateAudioBtn(); if(audioOn){const s=SLIDES[idx];const txt=document.getElementById('txt');if(txt)txt.innerHTML=s.say||'';document.getElementById('cur')?.classList.add('hidden');speak(s.say||'');} else {stopSpeak();} };
+function updateAudioBtn(){ audioBtn.classList.toggle('on',audioOn); audioBtn.textContent=audioOn?'🔊 Vorlesen: an':'🔈 Vorlesen: aus'; }
+function toggleFs(){ if(!document.fullscreenElement)document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){toggleOverlay(false);return;}
+  if(e.key==='f'||e.key==='F'){toggleFs();return;}
+  if(e.key===' '||e.key==='ArrowRight'||e.key==='Enter'){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+});
+window.addEventListener('beforeunload',stopSpeak);
+
+/* ---- neural background ---- */
+const cv=document.getElementById('net');const ctx=cv.getContext('2d');let W,H,nodes;
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;const n=Math.min(50,Math.floor(W*H/32000));
+  nodes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28}));}
+resize();addEventListener('resize',resize);
+function tick(){ctx.clearRect(0,0,W,H);
+  for(const p of nodes){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;}
+  for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j];const dx=a.x-b.x,dy=a.y-b.y;const d=Math.hypot(dx,dy);
+    if(d<150){ctx.strokeStyle='rgba(94,234,212,'+(.14*(1-d/150))+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+  for(const p of nodes){ctx.fillStyle='rgba(255,178,77,.55)';ctx.beginPath();ctx.arc(p.x,p.y,1.7,0,7);ctx.fill();}
+  requestAnimationFrame(tick);}
+tick();
+updateAudioBtn(); render();
+</script>
+
+</body>
+</html>
